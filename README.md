@@ -33,3 +33,34 @@
   <img src="https://img.shields.io/badge/Apache Tomcat-F8DC75?style=flat-square&logo=Apache Tomcat&logoColor=black"/>
   <img src="https://img.shields.io/badge/Redmine-B32024?style=flat-square&logo=Redmine&logoColor=white"/>
 </div>
+
+## 📺 View
+### 로그인(Spring Security)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/22203742-b927-4a0f-a016-10de6a3dbfc9)
+
+### 비밀번호 찾기(JavaMail)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/81ba95dc-4999-4986-bda4-945d8ff57e3d)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/5314255c-b6f9-4061-bfc2-06dec80e8328)
+
+### 사원 홈
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/9ca4a15d-4812-4f8f-ad4f-97be84a80e13)
+
+### 프로젝트 - 홈
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/a8815888-0dd7-41b8-929a-ba26e0e8813b)
+
+### 프로젝트 - 개요
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/090cd015-454b-4765-bfb8-314fcc887575)
+
+### 프로젝트 - 일감
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/67a42e1a-e3c2-4f46-b6df-18f12c0d577e)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/ef60acb1-9977-4cc0-95ff-60c14d0fbd53)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/3741cc0c-b98e-4769-a7dd-f368b559d553)
+
+### 프로젝트 - 간트차트
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d25d1397-8bd6-460e-a545-1a0621b058dd)
+
+
+### 조직도
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/6cb69603-55e2-4f24-9292-4cf5bdf36eff)
+
+
