@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.todo.mapper.TodoMapper">
+
+	<select id="selectTodoList" resultType="todo" parameterType="String">
+
+	    SELECT 
+            tl.todo_no
+            ,e.emp_no
+            ,tl.todo_content
+            ,tl.todo_reg_date
+            ,tl.todo_check_yn
+            ,tl.todo_del_yn		
+	    FROM 
+	        todo_list tl
+	    INNER JOIN 
+	        employee e ON tl.emp_no = e.emp_no
+	    WHERE 
+	        e.emp_no = #{empNo}
+	    AND
+	    	todo_check_yn='N'
+	    ORDER BY todo_no desc
+
+	    
+	</select>
+
+
+	<select id="selectCompleteTodoList" resultType="todo" parameterType="String">
+
+	    SELECT 
+            tl.todo_no
+            ,e.emp_no
+            ,tl.todo_content
+            ,tl.todo_reg_date
+            ,tl.todo_check_yn
+            ,tl.todo_del_yn		
+	    FROM 
+	        todo_list tl
+	    INNER JOIN 
+	        employee e ON tl.emp_no = e.emp_no
+	    WHERE 
+	        e.emp_no = #{empNo} 
+	    AND 
+	    	todo_check_yn='Y'
+	    AND
+	    	todo_del_yn='N'	
+	    ORDER BY todo_no desc
+
+	</select>
+
+
+	<insert id="insertTodoList" parameterType="todo">
+		<selectKey keyProperty="todoNo" resultType="int" order="BEFORE">
+			SELECT seq_todo.NEXTVAL FROM dual
+		</selectKey>
+	
+		INSERT INTO todo_list
+			(
+				todo_no
+				,emp_no
+				,todo_content
+				,todo_reg_date
+				,todo_check_yn
+				,todo_del_yn
+			)
+		VALUES
+			(
+				#{todoNo}
+				,#{empNo}
+				,#{todoContent}
+				,sysdate
+				,'N'
+				,'N'
+			)
+	</insert>
+	
+	
+	<update id="updateTodoList" parameterType="todo">
+		UPDATE 
+			todo_list
+		SET 
+			todo_check_yn='Y'
+		WHERE 
+			todo_no = #{todoNo}
+		AND
+			emp_no = #{empNo}		
+	</update>
+	
+	
+	
+ 	<update id="todoUncheck" parameterType="todo">
+		UPDATE 
+			todo_list
+		SET 
+			todo_check_yn='N'
+		WHERE 
+			todo_no = #{todoNo}
+		AND
+			emp_no = #{empNo}
+		AND
+			todo_check_yn='Y' 		
+	</update> 
+	
+	
+ 	<update id="updateTodoDelete" parameterType="todo">
+		UPDATE 
+			todo_list
+		SET 
+			todo_del_yn='Y'
+		WHERE 
+			todo_no = #{todoNo}
+		AND
+			emp_no = #{empNo}
+		AND
+			todo_check_yn='Y' 		
+	</update> 
+	
+	
+	
+
+ 
+</mapper>

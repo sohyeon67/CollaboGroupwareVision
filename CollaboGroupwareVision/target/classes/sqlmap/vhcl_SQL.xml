@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.reservation.mapper.VhclMapper">
+
+	<resultMap type="vhcl" id="vhclMap">
+		<id property="vhclNo" column="vhcl_no"/>
+		<result property="vhclNo" column="vhcl_no"/>
+		<result property="vhclName" column="vhcl_name"/>
+		<result property="enabled" column="enabled"/>
+		<result property="vhclImgPath" column="vhcl_img_path"/>
+	</resultMap>
+	
+	<resultMap type="vhclRsvt" id="vhclRsvtMap">
+		<id property="vRsvtNo" column="v_rsvt_no"/>
+		<result property="vRsvtNo" column="v_rsvt_no"/>
+		<result property="vhclNo" column="vhcl_no"/>
+		<result property="empNo" column="emp_no"/>
+		<result property="empName" column="emp_name"/>
+		<result property="rsvtDate" column="rsvt_date"/>
+		<result property="strtRsvtDate" column="strt_rsvt_date"/>
+		<result property="endRsvtDate" column="end_rsvt_date"/>
+		<result property="ppus" column="ppus"/>
+		<result property="vhclCancel" column="vhcl_cancel"/>
+		<result property="resrceRsvtStatus" column="resrce_rsvt_status"/>
+		<collection property="vhcl" resultMap="vhclMap"/>
+	</resultMap>
+
+	<select id="selectVhclList" resultType="vhcl">
+		SELECT
+			  vhcl_no
+			, vhcl_name
+			, enabled
+			, vhcl_img_path
+		FROM vhcl
+		order by vhcl_name
+	</select>
+
+	<select id="selectVhclRsvtList" resultType="vhclRsvt">
+		SELECT
+			  v_rsvt_no
+			, vhcl_no
+			, emp_no
+			, rsvt_date
+			, strt_rsvt_date
+			, end_rsvt_date
+			, ppus
+			, vhcl_cancel
+			, resrce_rsvt_status
+		FROM vhcl_rsvt
+	</select>
+	
+	<select id="selectVhclRsvtListByDay" parameterType="string" resultType="vhclRsvt">
+		SELECT
+		      v_rsvt_no
+		    , vhcl_no
+		    , emp_no
+		    , emp_name
+		    , rsvt_date
+		    , strt_rsvt_date
+		    , end_rsvt_date
+		    , ppus
+		    , vhcl_cancel
+		    , resrce_rsvt_status
+		FROM vhcl_rsvt
+		WHERE to_char(strt_rsvt_date, 'YYYY-MM-DD') = #{vhclDate}
+	</select>
+	
+	<update id="updateRsvtStatus" parameterType="int">
+		UPDATE vhcl_rsvt
+		set
+			resrce_rsvt_status = '02'
+		WHERE v_rsvt_no = #{vRsvtNo}
+	</update>
+	
+	<insert id="insertVhclRsvt" parameterType="vhclRsvt" useGeneratedKeys="true">
+		<selectKey keyProperty="vRsvtNo" resultType="int" order="BEFORE">
+			select seq_vhcl_rsvt.nextval from dual
+		</selectKey>
+		insert into vhcl_rsvt(
+			  v_rsvt_no
+		    , vhcl_no
+		    , emp_no
+		    , emp_name
+		    , rsvt_date
+		    , strt_rsvt_date
+		    , end_rsvt_date
+		    , ppus
+		    , vhcl_cancel
+		    , resrce_rsvt_status
+		)values(
+			  #{vRsvtNo}
+			, #{vhclNo}
+			, #{empNo}
+			, (select emp_name from employee where emp_no = #{empNo})
+			, sysdate
+			, to_date(#{strtRsvtDate},'yyyy-MM-dd HH24')
+			, to_date(#{endRsvtDate},'yyyy-MM-dd HH24')
+			, #{ppus}
+			, null
+			, '01'
+		)
+	</insert>
+	
+	<select id="checkReserve" parameterType="vhclRsvt" resultType="vhclRsvt">
+		select
+			v_rsvt_no
+			,vhcl_no
+			,emp_no
+			,emp_name
+			,rsvt_date
+			,strt_rsvt_date
+			,end_rsvt_date
+			,ppus
+			,vhcl_cancel
+			,resrce_rsvt_status
+		from vhcl_rsvt
+		where vhcl_no = #{vhclNo}
+		and to_char(strt_rsvt_date, 'yyyy-MM-dd') = #{rsvtDate}
+		and resrce_rsvt_status != '00'
+	</select>
+	
+	<select id="selectDetailVhclRsvt" parameterType="int" resultMap="vhclRsvtMap">
+		select
+		    v_rsvt_no
+		  , vr.vhcl_no
+		  , emp_no
+		  , emp_name
+		  , rsvt_date
+		  , strt_rsvt_date
+		  , end_rsvt_date
+		  , ppus
+		  , vhcl_cancel
+		  , resrce_rsvt_status
+		  , v.vhcl_name
+		  , v.vhcl_img_path
+		from vhcl_rsvt vr, vhcl v
+		where vr.vhcl_no = v.vhcl_no
+		and v_rsvt_no = #{vRsvtNo}
+	</select>
+	
+	<update id="vhclCancel" parameterType="int">
+		update vhcl_rsvt
+		set
+			resrce_rsvt_status = '00'
+		where v_rsvt_no = #{vRsvtNo}
+	</update>	
+	
+	
+	
+	
+	
+	<!-- 관리자 CRUD  -->
+	
+	<insert id="adminVhclInsert" parameterType="vhcl">
+		insert into vhcl(
+			  vhcl_no
+			, vhcl_name
+			, enabled
+			, vhcl_img_path
+		) values (
+			  #{vhclNo}
+			, #{vhclName}
+			, #{enabled}
+			, #{vhclImgPath}
+		)
+	</insert>
+	
+	
+	<update id="adminVhclUpdate" parameterType="vhcl">
+		update vhcl
+		set
+			vhcl_no = #{vhclNo}
+			,vhcl_name = #{vhclName}
+			,enabled = #{enabled}
+			,vhcl_img_path = #{vhclImgPath}
+		where vhcl_no = #{vhclNo}
+	</update>
+	
+	
+	<delete id="adminVhclDelete" parameterType="String">
+		delete from vhcl
+		where vhcl_no = #{vhclNo}
+	</delete>
+	
+	
+	
+	
+	
+	
+</mapper>

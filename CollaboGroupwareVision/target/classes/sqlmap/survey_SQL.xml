@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.survey.mapper.SurveyMapper">
+
+<!-- 	<select id="list" parameterType="map" resultType="survey">
+	    SELECT  FROM survey WHERE empNo = #{empNo}
+	</select> -->
+
+<!-- 	<select id="ongoingSurveyList" resultType="survey">
+       select
+         b.*
+      from (
+         select
+            a.*, row_number() over (order by a.survey_no desc) rnum
+         from (
+            select 
+				survey_no
+				, emp_no
+				, survey_writer
+				, survey_title
+				, survey_content
+				, survey_reg_date
+				, survey_start_date
+				, survey_end_date
+				, survey_status
+				, survey_subject
+            from survey
+            where 1=1
+            <include refid="ongoingSurveySearch"/>
+            order by survey_no desc
+         ) a
+      ) b
+      <![CDATA[
+      where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+      ]]>
+   </select> -->
+   
+<!-- 	<select id="ongoingSurveyListCount" resultType="int">
+        SELECT COUNT(*) FROM survey
+        where 1=1
+        <include refid="ongoingSurveySearch"/>
+	</select> -->
+   
+<!--  	<sql id="ongoingSurveySearch">
+	      <if test="searchType != null and searchType == 'title'">
+	         and (survey_title like '%'||#{searchWord}||'%')
+	      </if>
+	      <if test="searchType != null and searchType == 'writer'">
+	         and (emp_no like '%'||#{searchWord}||'%')
+	      </if>
+	      <if test="searchType != null and searchType == 'content'">
+	         and (survey_content like '%'||#{searchWord}||'%')
+	      </if>
+  	</sql> -->
+  	
+<!-- 	<select id="closedSurveyList" resultType="survey">
+       select
+         b.*
+      from (
+         select
+            a.*, row_number() over (order by a.survey_no desc) rnum
+         from (
+            select 
+				survey_no
+				, emp_no
+				, survey_writer
+				, survey_title
+				, survey_content
+				, survey_reg_date
+				, survey_start_date
+				, survey_end_date
+				, survey_status
+				, survey_subject
+            from survey
+            where 1=1
+            <include refid="closedSurveySearch"/>
+            order by survey_no desc
+         ) a
+      ) b
+      <![CDATA[
+      where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+      ]]>
+   </select> -->
+   
+<!-- 	<select id="closedSurveyListCount" resultType="int">
+        SELECT COUNT(*) FROM survey
+        where 1=1
+        <include refid="closedSurveySearch"/>
+	</select> -->
+   
+<!--  	<sql id="closedSurveySearch">
+	      <if test="searchType != null and searchType == 'title'">
+	         and (survey_title like '%'||#{searchWord}||'%')
+	      </if>
+	      <if test="searchType != null and searchType == 'writer'">
+	         and (emp_no like '%'||#{searchWord}||'%')
+	      </if>
+	      <if test="searchType != null and searchType == 'content'">
+	         and (survey_content like '%'||#{searchWord}||'%')
+	      </if>
+  	</sql> -->
+  	
+  	<select id="surveyList" resultType="kr.or.ddit.survey.vo.Survey">
+  		select
+  			survey_no
+  			,survey_writer
+  			,survey_title
+  			,survey_start_date
+  			,survey_end_date
+  			,survey_status
+  			,survey_subject
+  		from survey
+  		order by survey_start_date desc
+  	</select>
+  	
+	<insert id="surveyInsert"
+		parameterType="kr.or.ddit.survey.vo.Survey">
+		INSERT INTO SURVEY (
+		survey_no
+		, emp_no
+		, survey_writer
+		, survey_title
+		, survey_content
+		, survey_reg_date
+		, survey_start_date
+		, survey_end_date
+		, survey_status
+		, survey_subject
+		) VALUES (
+		(SELECT
+		NVL(MAX(survey_no),0)+1 FROM survey)
+		,#{empNo}
+		,#{surveyWriter}
+		,#{surveyTitle}
+		,#{surveyContent}
+		,sysdate
+		,sysdate
+		,sysdate
+		,#{surveyStatus}
+		,#{surveySubject}
+		)
+	</insert>
+
+	<insert id="surveyQuestionInsert" parameterType="kr.or.ddit.survey.vo.SurveyQuestion">
+		INSERT INTO SURVEY_QUESTION (
+			question_no
+			, survey_no
+			, question_title
+			, need_yn
+			, survey_type
+			, attendee_count
+		) VALUES 
+		(		
+		(SELECT NVL(MAX(question_no),0)+1 FROM survey_question)
+		, (SELECT NVL(MAX(survey_no),0) FROM survey)
+		, #{questionTitle}
+		, #{needYn}
+		, #{surveyType}
+		, #{attendeeCount}
+		)
+	</insert>
+	
+	<update id="surveyOptionInsert" parameterType="kr.or.ddit.survey.vo.SurveyOption">
+		<foreach collection="surveyOptionList" open="INSERT ALL" close="SELECT * FROM DUAL" item="item" separator=" " index="i">
+			INTO SURVEY_OPTION (option_no, question_no, survey_no, option_content) -->
+		      VALUES (
+		      (SELECT NVL(MAX(option_no),0)+1 FROM survey_option) +#{i}
+		      , (SELECT NVL(MAX(question_no),0) FROM survey_question)
+		      , (SELECT NVL(MAX(survey_no),0) FROM survey)
+		      , #{item.optionContent})
+		</foreach>
+	</update>
+	
+	<resultMap type="kr.or.ddit.survey.vo.Survey" id="surveyMap">
+		<result property="surveyNo" column="SURVEY_NO"/>
+		<result property="empNo" column="EMP_NO"/>
+		<result property="surveyWriter" column="SURVEY_WRITER"/>
+		<result property="surveyTitle" column="SURVEY_TITLE"/>
+		<result property="surveyContent" column="SURVEY_CONTENT"/>
+		<result property="surveyRegDate" column="SURVEY_REG_DATE"/>
+		<result property="surveyStartDate" column="SURVEY_START_DATE"/>
+		<result property="surveyEndDate" column="SURVEY_END_DATE"/>
+		<result property="surveyStatus" column="SURVEY_STATUS"/>
+		<result property="surveySubject" column="SURVEY_SUBJECT"/>
+		<collection property="surveyQuestionList" resultMap="surveyQuestionMap"></collection>
+	</resultMap>
+   
+	<resultMap type="kr.or.ddit.survey.vo.SurveyQuestion" id="surveyQuestionMap">
+		<result property="questionNo" column="QUESTION_NO"/>
+		<result property="surveyNo" column="SURVEY_NO"/>
+		<result property="questionTitle" column="QUESTION_TITLE"/>
+		<result property="needYn" column="NEED_YN"/>
+		<result property="surveyType" column="SURVEY_TYPE"/>
+		<result property="attendeeCount" column="ATTENDEE_COUNT"/>
+		<collection property="surveyOptionList" resultMap="surveyOptionMap"></collection>
+	</resultMap>
+
+	<resultMap type="kr.or.ddit.survey.vo.SurveyOption" id="surveyOptionMap">
+		<result property="optionNo" column="OPTION_NO"/>
+		<result property="questionNo" column="QUESTION_NO"/>
+		<result property="surveyNo" column="SURVEY_NO"/>
+		<result property="optionContent" column="OPTION_CONTENT"/>
+	</resultMap>
+   
+   
+<!-- <insert id="insert" parameterType="board" useGeneratedKeys="true">
+    <selectKey keyProperty="boardNo" resultType="int" order="BEFORE">
+        select seq_board.nextval from dual
+    </selectKey>
+    insert into board(
+        board_no,
+        emp_no,
+        board_code,
+        board_title,
+        board_content,
+        reg_date,
+        update_date,
+        inq_cnt,
+        temp_yn
+    ) values (
+        #{boardNo}
+        ,#{empNo}
+        ,#{boardCode}
+        ,#{boardTitle}
+        ,#{boardContent}
+        ,sysdate
+        ,sysdate
+        ,0
+        ,'N'
+    )
+</insert> -->
+
+   
+<!-- 파일 업로드 정보 삽입 쿼리 -->
+<!-- <insert id="insert2" parameterType="boardAttach" useGeneratedKeys="true">
+    부모 테이블의 BOARD_NO 값을 확인하고 설정
+    <selectKey keyProperty="fileNo" resultType="int" order="BEFORE">
+        select seq_board_attach.nextval from dual
+    </selectKey>
+    BOARD_ATTACH 테이블에 데이터 삽입
+    insert into board_attach (
+        file_no
+        ,board_no
+        ,file_name
+        ,file_savepath
+        ,file_mimetype
+        ,file_size
+        ,file_fancysize
+        ,file_downcount
+    ) values (
+        #{fileNo}
+        ,#{boardNo}
+        ,#{fileName, jdbcType=VARCHAR}
+        ,#{fileSavepath, jdbcType=VARCHAR}
+        ,#{fileMimetype, jdbcType=VARCHAR}
+        ,#{fileSize, jdbcType=VARCHAR}
+        ,#{fileFancysize, jdbcType=VARCHAR}
+        ,#{fileDowncount}
+    )
+</insert> -->
+   
+<!--    <select id="detail" parameterType="int" resultType="board">
+      select
+         board_no,
+         board_title,
+         board_content,
+         emp_no,
+         reg_date,
+         inq_cnt
+      from board
+      where board_no = #{boardNo}
+   </select> -->
+   
+<!--    <select id="detail2" parameterType="int" resultType="boardAttach">
+      select
+         file_name
+         ,file_savepath
+      from board_attach
+      where board_no = #{boardNo}
+   </select> -->
+   
+<!--    <update id="update" parameterType="board">
+      update board
+      set
+         board_title = #{boardTitle},
+         board_content = #{boardContent}
+      where board_no = #{boardNo}
+   </update> -->
+   
+   <!-- 조회수 증가 -->
+<!--    <update id="update2" parameterType="board">
+      update board
+      set
+         inq_cnt = inq_cnt+1
+      where board_no = #{boardNo}
+   </update> -->
+   
+<!-- <update id="updateBoardAttach" parameterType="boardAttach">
+    update board
+    set
+        file_no = #{fileNo},
+    where file_no = #{fileNo}
+</update> -->
+
+
+
+<!--     <delete id="delete" parameterType="int">
+    	delete from board
+    	where board_no = #{boardNo}
+    </delete> -->
+   
+   <!-- 댓글 입력 -->
+<!--    <insert id="replyInsert" parameterType="reply" useGeneratedKeys="true">
+      <selectKey resultType="int" order="BEFORE" keyProperty="replyNo">
+         SELECT SEQ_REPLY.NEXTVAL FROM DUAL
+      </selectKey>
+         INSERT INTO reply(
+            reply_no
+            ,board_no
+            ,emp_no
+            ,reply_content
+            ,reg_date
+            ,mod_date
+         ) VALUES (
+            #{replyNo}
+            ,#{boardNo}
+            ,#{empNo}
+            ,#{replyContent}
+            ,SYSDATE
+            ,SYSDATE
+         )
+   </insert> -->
+   
+<!--     <select id="selectAttachList" parameterType="map" resultType="boardAttach">
+        SELECT
+            file_no,
+            b.board_no,
+            file_name,
+            file_savepath,
+            file_mimetype,
+            file_size,
+            file_fancysize,
+            file_downcount
+        FROM board b left outer join board_attach ba on(b.board_no = ba.board_no)
+        WHERE board_code = #{boardCode}
+        order by 2 desc
+    </select> -->
+
+</mapper>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

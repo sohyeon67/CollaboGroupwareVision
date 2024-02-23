@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.community.mapper.CmnyMapper">
+	<resultMap type="cmny" id="cmnyMap">
+		<id column="cmny_no" property="cmnyNo"/>
+		<result column="cmny_no" property="cmnyNo"/>
+		<result column="board_code" property="boardCode"/>
+		<result column="cmny_name" property="cmnyName"/>
+		<result column="cmny_top" property="cmnyTop"/>
+		<result column="cmny_intro" property="cmnyIntro"/>
+		<result column="open_day" property="openDay"/>
+		<result column="close_day" property="closeDay"/>
+		<result column="member_count" property="memberCount"/>
+		<result column="cmny_return" property="cmnyReturn"/>
+		<result column="cmny_approval" property="cmnyApproval"/>
+		<result column="cmny_status" property="cmnyStatus"/>
+		<result column="cmny_img_path" property="cmnyImgPath"/>
+		<collection property="cmnyMem" resultMap="cmnyMemMap"></collection>
+	</resultMap>
+	
+	<resultMap type="cmnyMem" id="cmnyMemMap">
+		<id column="cmny_mem_no" property="cmnyMemNo"/>
+		<result column="cmny_mem_no" property="cmnyMemNo"/>
+		<result column="cmny_no" property="cmnyNo"/>
+		<result column="emp_no" property="empNo"/>
+		<result column="join_day" property="joinDay"/>
+		<result column="quit_day" property="quitDay"/>
+		<result column="cmny_enabled" property="cmnyEnabled"/>
+		<result column="cmny_mem_approval" property="cmnyMemApproval"/>
+		<result column="cmny_mem_return" property="cmnyMemReturn"/>
+		<result column="cmny_top_yn" property="cmnyTopYn"/>
+	</resultMap>
+
+	<!-- 추가 -->
+	<sql id="cmnySearch">
+		<if test="searchType != null and searchType == 'cmnyName'">
+			and (cmny_name like '%' || #{searchWord} || '%')
+		</if>
+		<if test="searchType != null and searchType == 'cmnyTop'">
+			and (cmny_top like '%' || #{searchWord} || '%')
+		</if>
+	</sql>
+
+	<select id="selectCmnyCount" parameterType="pagingVO"
+		resultType="int">
+		select count(CMNY_NO) from community
+		where 1=1
+		and CMNY_STATUS = '1'
+		<include refid="cmnySearch" /> <!-- 추가 -->
+	</select>
+
+	<select id="selectCmnyList" parameterType="pagingVO"
+		resultType="cmny">
+		select
+		b.*
+		from(
+		select
+		a.*, row_number() over (order by a.CMNY_NO desc)
+		rnum
+		from(
+		select
+		CMNY_NO, CMNY_NAME, CMNY_TOP, OPEN_DAY, CMNY_IMG_PATH
+		from community
+		where 1=1
+		<include refid="cmnySearch" /> <!-- 추가 -->
+		and CMNY_STATUS = '1'
+		order by CMNY_NO desc
+		) a
+		) b	
+	  <![CDATA[
+	  	where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+	  ]]>
+
+	</select>
+	
+
+	<insert id="comInsert" parameterType="cmny"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="cmnyNo" resultType="int"
+			order="BEFORE">
+			select seq_cmny.nextval from dual
+		</selectKey>
+
+		<!-- 커뮤니티 생성 -->
+		insert into community(
+		CMNY_NO
+		,CMNY_NAME
+		,CMNY_TOP
+		,CMNY_INTRO
+		,OPEN_DAY
+		,CMNY_IMG_PATH
+		) values (
+		#{cmnyNo}
+		,#{cmnyName}
+		,#{cmnyTop}
+		,#{cmnyIntro}
+		,TO_CHAR(SYSDATE, 'YYYY.MM.DD')
+		,#{cmnyImgPath}
+		)
+	</insert>
+
+	<!-- 커뮤니티가 처음 생성될 때 커뮤니티장도 멤버 리스트에 생성되어야함 -->
+	<insert id="comInsertMem" parameterType="cmnyMem"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="cmnyMemNo" resultType="int"
+			order="BEFORE">
+			select seq_cmny_mem.nextval from dual
+		</selectKey>
+
+		insert into community_mem(
+		CMNY_MEM_NO
+		,CMNY_NO
+		,EMP_NO
+		,JOIN_DAY
+		,CMNY_MEM_APPROVAL
+		,CMNY_TOP_YN
+		) values (
+		#{cmnyMemNo}
+		,#{cmnyNo}
+		,#{empNo}
+		,TO_CHAR(SYSDATE, 'YYYY.MM.DD')
+		,'1'
+		,'Y'
+		)
+	</insert>
+	
+	<!-- 커뮤니티 가입 -->
+	<insert id="comSubmitMem" parameterType="cmnyMem"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="cmnyMemNo" resultType="int"
+			order="BEFORE">
+			select seq_cmny_mem.nextval from dual
+		</selectKey>
+
+		insert into community_mem(
+		CMNY_MEM_NO
+		,CMNY_NO
+		,EMP_NO
+		,JOIN_DAY
+		,CMNY_MEM_APPROVAL
+		,CMNY_TOP_YN
+		) values (
+		#{cmnyMemNo}
+		,#{cmnyNo}
+		,#{empNo}
+		,TO_CHAR(SYSDATE, 'YYYY.MM.DD')
+		,'1'
+		,'N'
+		)
+	</insert>
+	
+
+	<!-- 커뮤니티 상세보기 -->
+	<select id="getCommunityDetail" parameterType="int" resultType="cmny">
+		SELECT
+			CMNY_NO
+			,BOARD_CODE
+			,CMNY_NAME
+			,CMNY_TOP
+			,CMNY_INTRO
+			,OPEN_DAY
+			,CLOSE_DAY
+			,MEMBER_COUNT
+			,CMNY_RETURN
+			,CMNY_APPROVAL
+			,CMNY_STATUS
+			,CMNY_IMG_PATH
+		FROM community 
+		WHERE CMNY_NO = #{cmnyNo}
+	</select>
+	
+	
+	<!-- 커뮤니티 멤버 리스트 -->
+	<select id="selectCmnyMemList" parameterType="int" resultType="cmnyMem">
+		SELECT
+			cm.CMNY_MEM_NO
+	        ,cm.CMNY_NO
+	        ,cm.EMP_NO
+	        ,cm.JOIN_DAY
+	        ,cm.QUIT_DAY
+	        ,cm.CMNY_ENABLED
+	        ,cm.CMNY_MEM_APPROVAL
+	        ,cm.CMNY_MEM_RETURN
+	        ,cm.CMNY_TOP_YN
+	        ,e.emp_name
+	        ,d.dept_name
+	        ,(SELECT common_code_name FROM common_code WHERE common_code_group_id = 100 AND common_code = e.position_code) AS position_name
+		FROM community_mem cm
+	    JOIN employee e ON cm.EMP_NO = e.EMP_NO
+	    JOIN dept d ON e.dept_code = d.dept_code
+	    WHERE cm.CMNY_NO = #{cmnyNo}
+	    AND cm.CMNY_ENABLED = '1'
+	    ORDER BY CMNY_TOP_YN desc	
+	</select>
+	
+	
+	<!-- 커뮤니티 탈퇴 -->
+	<update id="withdrawMem" parameterType="cmnyMem">
+		UPDATE
+			community_mem	
+		SET
+			CMNY_ENABLED = '0'
+		WHERE
+			CMNY_NO = #{cmnyNo}
+		AND	
+			EMP_NO = #{empNo}	
+	</update>
+	
+	
+	<!-- 커뮤니티 폐쇄를 위한 남아있는 가입 멤버 명수 조회 -->
+	<select id="cmnycloseMemCnt" resultType="int" parameterType="int">
+		SELECT
+			count(CMNY_MEM_NO)
+		FROM
+			community_mem
+		WHERE 
+			CMNY_NO = #{cmnyNo}
+		AND
+			CMNY_TOP_YN = 'N'
+		AND
+			CMNY_ENABLED = '1'
+	</select>
+	
+	
+	<!-- 커뮤니티 폐쇄 -->
+	<update id="updateCmnyStatus" parameterType="cmny">
+	UPDATE
+		community	
+	SET
+		CMNY_STATUS = '0'
+	WHERE
+		CMNY_NO = #{cmnyNo}
+	</update>
+	
+	
+	<select id="getMyCommunityList" parameterType="string" resultMap="cmnyMap">
+		SELECT 
+		      c.CMNY_NO
+		    , c.CMNY_NAME
+		    , c.CMNY_TOP
+		    , c.CMNY_INTRO
+		    , c.OPEN_DAY
+		    , c.CLOSE_DAY
+		    , c.MEMBER_COUNT
+		    , c.CMNY_RETURN
+		    , c.CMNY_APPROVAL
+		    , c.CMNY_STATUS
+		    , c.CMNY_IMG_PATH
+		    , cm.EMP_NO
+		    , cm.JOIN_DAY
+		    , cm.QUIT_DAY
+		    , cm.CMNY_ENABLED
+		    , cm.CMNY_MEM_APPROVAL
+		    , cm.CMNY_MEM_RETURN
+		    , cm.CMNY_TOP_YN
+		FROM community_mem cm
+		INNER JOIN community c ON cm.CMNY_NO = c.CMNY_NO
+		WHERE cm.EMP_NO = #{empNo}
+		AND cm.CMNY_ENABLED = '1'
+		AND c.CMNY_STATUS = '1'
+		ORDER BY CMNY_TOP_YN desc
+	</select>
+
+	<select id="getCmnyTopEmpNo" parameterType="int" resultType="string">
+		select 
+			emp_no
+		from community_mem
+		where cmny_no = #{cmnyNo}
+		and cmny_top_yn = 'Y'
+	</select>
+
+
+
+</mapper>

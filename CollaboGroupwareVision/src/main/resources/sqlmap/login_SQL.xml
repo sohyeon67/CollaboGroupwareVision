@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.account.mapper.LoginMapper">
+
+	<resultMap type="employee" id="employeeMap">
+	    <id property="empNo" column="emp_no"/>
+	    <result property="deptCode" column="dept_code"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="empPw" column="emp_pw"/>
+	    <result property="empTel" column="emp_tel"/>
+	    <result property="extNo" column="ext_no"/>
+	    <result property="empEmail" column="emp_email"/>
+	    <result property="empPsnEmail" column="emp_psn_email"/>
+	    <result property="empBirth" column="emp_birth"/>
+	    <result property="empRrn" column="emp_rrn"/>
+	    <result property="empZip" column="emp_zip"/>
+	    <result property="empAddr1" column="emp_addr1"/>
+	    <result property="empAddr2" column="emp_addr2"/>
+	    <result property="profileImgPath" column="profile_img_path"/>
+	    <result property="signImg" column="sign_img"/>
+	    <result property="accountNo" column="account_no"/>
+	    <result property="joinDay" column="join_day"/>
+	    <result property="leaveDay" column="leave_day"/>
+	    <result property="yrycCount" column="yryc_count"/>
+	    <result property="positionCode" column="position_code"/>
+	    <result property="position" column="position"/>
+	    <result property="dutyCode" column="duty_code"/>
+	    <result property="duty" column="duty"/>
+	    <result property="bankCode" column="bank_code"/>
+	    <result property="bank" column="bank"/>
+	    <result property="hffcStatus" column="hffc_status"/>
+	    <result property="hffc" column="hffc"/>
+	    <result property="enabled" column="enabled"/>
+	    <result property="adminYn" column="admin_yn"/>
+	    <result property="empQr" column="emp_qr"/>
+	    
+	    <collection property="authList" resultMap="empAuthMap"/>
+	</resultMap>
+	
+	<resultMap type="auth" id="empAuthMap">
+		<result property="empNo" column="emp_no"/>
+		<result property="auth" column="auth"/>
+	</resultMap>
+	
+	<!-- 시큐리티 로그인 및 정보 가져올 때 사용 -->
+	<select id="readByUserId" parameterType="string" resultMap="employeeMap">
+        SELECT
+		    e.emp_no
+		    , e.dept_code
+		    , e.emp_name
+		    , e.emp_pw
+		    , e.emp_tel
+		    , e.ext_no
+		    , e.emp_email
+		    , e.emp_psn_email
+		    , e.emp_birth
+		    , e.emp_rrn
+		    , e.emp_zip
+		    , e.emp_addr1
+		    , e.emp_addr2
+		    , e.profile_img_path
+		    , e.sign_img
+		    , e.account_no
+		    , e.join_day
+		    , e.leave_day
+		    , e.yryc_count
+		    , e.position_code
+		    , e.duty_code
+		    , e.bank_code
+		    , e.hffc_status
+		    , e.enabled
+		    , e.admin_yn
+		    , e.emp_qr
+		    , get_common_code_name('100', e.position_code) position
+		    , get_common_code_name('101', e.duty_code) duty
+		    , get_common_code_name('103', e.bank_code) bank
+		    , get_common_code_name('104', e.hffc_status) hffc
+		    , d.dept_name
+		    , a.auth
+		FROM
+		    employee e
+		LEFT OUTER JOIN
+		    dept d ON e.dept_code = d.dept_code
+		INNER JOIN
+		    auth a ON e.emp_no = a.emp_no
+		WHERE
+			e.emp_no = #{empNo} AND enabled = 1
+	</select>
+	
+	<!-- 사번과 이메일 맞는지 확인 -->
+	<select id="findByEmpNoAndPsnEmail" parameterType="employee" resultType="int">
+		SELECT COUNT(emp_no)
+		FROM employee
+		WHERE emp_no = #{empNo}
+		AND emp_psn_email = #{empPsnEmail}
+		AND enabled = 1
+	</select>
+	
+	<!-- 임시비밀번호 업데이트 -->
+	<update id="updatePassword" parameterType="map">
+		UPDATE employee
+		SET emp_pw = #{empPw}
+		WHERE emp_no = #{empNo}
+	</update>
+	
+
+</mapper>

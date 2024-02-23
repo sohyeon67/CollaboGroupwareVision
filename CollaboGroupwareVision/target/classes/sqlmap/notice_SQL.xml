@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.board.notice.mapper.NoticeMapper">
+ 
+<!-- <select id="list" parameterType="map" resultType="board">
+    SELECT  FROM board WHERE empNo = #{empNo}
+</select> -->
+
+	<resultMap type="kr.or.ddit.board.vo.Board" id="boardMap">
+		<id column="board_no" property="boardNo"/>
+		<result column="board_no" property="boardNo"/>
+		<result column="board_code" property="boardCode"/>
+		<result column="board_title" property="boardTitle"/>
+		<result column="board_content" property="boardContent"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="update_date" property="updateDate"/>
+		<result column="inq_cnt" property="inqCnt"/>
+		<result column="temp_yn" property="tempYn"/>
+		<collection property="employee" resultMap="empMap"/>
+	</resultMap>
+	
+	<resultMap type="employee" id="empMap">
+		<id property="empNo" column="emp_no"/>
+	    <result property="deptCode" column="dept_code"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="empPw" column="emp_pw"/>
+	    <result property="empTel" column="emp_tel"/>
+	    <result property="extNo" column="ext_no"/>
+	    <result property="empEmail" column="emp_email"/>
+	    <result property="empPsnEmail" column="emp_psn_email"/>
+	    <result property="empBirth" column="emp_birth"/>
+	    <result property="empRrn" column="emp_rrn"/>
+	    <result property="empZip" column="emp_zip"/>
+	    <result property="empAddr1" column="emp_addr1"/>
+	    <result property="empAddr2" column="emp_addr2"/>
+	    <result property="signImg" column="sign_img"/>
+	    <result property="accountNo" column="account_no"/>
+	    <result property="joinDay" column="join_day"/>
+	    <result property="leaveDay" column="leave_day"/>
+	    <result property="yrycCount" column="yryc_count"/>
+	    <result property="positionCode" column="position_code"/>
+	    <result property="position" column="position"/>
+	    <result property="dutyCode" column="duty_code"/>
+	    <result property="duty" column="duty"/>
+	    <result property="bankCode" column="bank_code"/>
+	    <result property="bank" column="bank"/>
+	    <result property="hffcStatus" column="hffc_status"/>
+	    <result property="hffc" column="hffc"/>
+	    <result property="enabled" column="enabled"/>
+	    <result property="adminYn" column="admin_yn"/>
+	</resultMap>
+
+<sql id="baseQuery">
+  WHERE 1=1
+  <if test="boardCode != null">
+    AND board_code = #{boardCode}
+  </if>
+</sql>
+
+    <select id="noticeList" resultMap="boardMap">
+    select
+         b.*
+      from (
+         select
+            a.*, row_number() over (order by a.board_no desc) rnum
+         from (
+            select 
+               board_code,
+               board_no,
+               board_title,
+               b.emp_no,
+               board_content,
+               reg_date,
+               inq_cnt,
+               e.emp_name
+            from board b, employee e
+            where 1=1
+            and b.emp_no = e.emp_no
+            and board_code = 1
+            <include refid="noticeSearch"/>
+            order by board_no desc
+         ) a
+      ) b
+      <![CDATA[
+      where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+      ]]>
+   </select>
+   
+   <select id="noticeListCount" resultType="int" parameterType="PaginationInfo">
+        SELECT COUNT(*) FROM board
+        where 1=1
+        and board_code = #{boardCode}
+        <include refid="noticeSearch"/>
+    </select>
+   
+     <sql id="noticeSearch">
+      <if test="searchType != null and searchType == 'title'">
+         and (board_title like '%'||#{searchWord}||'%')
+      </if>
+      <if test="searchType != null and searchType == 'writer'">
+         and (emp_no like '%'||#{searchWord}||'%')
+      </if>
+      <if test="searchType != null and searchType == 'content'">
+         and (board_content like '%'||#{searchWord}||'%')
+      </if>
+   </sql>  
+   
+<insert id="noticeInsert" parameterType="board" useGeneratedKeys="true">
+    <selectKey keyProperty="boardNo" resultType="int" order="BEFORE">
+        select seq_board.nextval from dual
+    </selectKey>
+    insert into board(
+        board_no,
+        emp_no,
+        board_code,
+        board_title,
+        board_content,
+        reg_date,
+        update_date,
+        inq_cnt,
+        temp_yn
+    ) values (
+        #{boardNo}
+        ,#{empNo}
+        ,#{boardCode}
+        ,#{boardTitle}
+        ,#{boardContent}
+        ,sysdate
+        ,sysdate
+        ,0
+        ,'N'
+    )
+</insert>
+
+   
+<insert id="noticeInsert2" parameterType="boardAttach" useGeneratedKeys="true">
+    <selectKey keyProperty="fileNo" resultType="int" order="BEFORE">
+        select seq_board_attach.nextval from dual
+    </selectKey>
+    insert into board_attach (
+        file_no
+        ,board_no
+        ,file_name
+        ,file_savepath
+        ,file_mimetype
+        ,file_size
+        ,file_fancysize
+        ,file_downcount
+    ) values (
+        #{fileNo}
+        ,#{boardNo}
+        ,#{fileName, jdbcType=VARCHAR}
+        ,#{fileSavepath, jdbcType=VARCHAR}
+        ,#{fileMimetype, jdbcType=VARCHAR}
+        ,#{fileSize, jdbcType=VARCHAR}
+        ,#{fileFancysize, jdbcType=VARCHAR}
+        ,#{fileDowncount}
+    )
+</insert>
+
+	<insert id="noticeInsertBoardAttach" parameterType="boardAttach" useGeneratedKeys="true">
+		<selectKey keyProperty="fileNo" resultType="int" order="BEFORE">
+	        select seq_board_attach.nextval from dual
+	    </selectKey>
+		insert into board_attach(
+	        file_no
+	        ,board_no
+	        ,file_name
+	        ,file_savepath
+	        ,file_mimetype
+	        ,file_size
+	        ,file_fancysize
+	        ,file_downcount
+		)values(
+	        #{fileNo}
+	        ,#{boardNo}
+	        ,#{fileName, jdbcType=VARCHAR}
+	        ,#{fileSavepath, jdbcType=VARCHAR}
+	        ,#{fileMimetype, jdbcType=VARCHAR}
+	        ,#{fileSize, jdbcType=VARCHAR}
+	        ,#{fileFancysize, jdbcType=VARCHAR}
+	        ,#{fileDowncount}
+		)
+	</insert>
+
+     <select id="noticeSelectAttachList" parameterType="map" resultType="boardAttach">
+        SELECT
+            file_no,
+            board_no,
+            file_name,
+            file_savepath,
+            file_mimetype,
+            file_size,
+            file_fancysize,
+            file_downcount
+        FROM board_attach
+        WHERE board_no = #{boardNo}
+    </select>  
+   
+    <select id="noticeDetail" parameterType="int" resultType="board">
+      select
+         board_no,
+         board_title,
+         board_content,
+         b.emp_no as "EMP_NO",
+         reg_date,
+         inq_cnt,
+         e.emp_name as "employee.empName"
+      from board b
+      join employee e ON b.emp_no = e.emp_no
+      where board_no = #{boardNo}
+   </select>
+   
+   <select id="noticeDetail2" parameterType="int" resultType="boardAttach">
+      select
+     	 file_no
+         ,file_name
+         ,file_savepath
+      from board_attach
+      where board_no = #{boardNo}
+   </select>
+   
+    <delete id="noticeDelete" parameterType="int">
+    	delete from board
+    	where board_no = #{boardNo}
+    </delete>
+   
+   <update id="noticeUpdate" parameterType="board">
+      update board
+      set
+         board_title = #{boardTitle},
+         board_content = #{boardContent}
+      where board_no = #{boardNo}
+   </update>
+   
+   <update id="noticeUpdate2" parameterType="board">
+      update board
+      set
+         inq_cnt = inq_cnt+1
+      where board_no = #{boardNo}
+   </update>
+   
+<update id="noticeUpdateBoardAttach" parameterType="boardAttach">
+    update board
+    set
+        file_no = #{fileNo},
+    where file_no = #{fileNo}
+</update>    
+
+<!-- <select id="getEmpNo" parameterType="int" resultType="string">
+	select emp_no
+	from board
+	where board_no = #{boardNo}
+</select> -->
+
+    <delete id="noticeDeleteBoardFileList">
+    	delete from board_attach
+    	<where>
+			file_no in
+			<foreach collection="array" item="fileNo" open="(" close=")" separator=",">
+				${fileNo }
+			</foreach>    	
+    	</where>
+    </delete>
+
+    <!-- 파일업로드 -->
+   	<select id="selectFileInfo" parameterType="int" resultType="boardAttach">
+		select
+	        file_no
+	        ,board_no
+	        ,file_name
+	        ,file_savepath
+	        ,file_mimetype
+	        ,file_size
+	        ,file_fancysize
+	        ,file_downcount
+		from board_attach
+		where file_no = #{fileNo}
+	</select>
+
+
+	<select id="noticeListMain" resultType="board">
+    select
+         b.*
+      from (
+         select
+            a.*, row_number() over (order by a.board_no desc) rnum
+         from (
+            select 
+               board_code,
+               board_no,
+               board_title,
+               b.emp_no,
+               board_content,
+               reg_date,
+               inq_cnt,
+               e.emp_name
+            from board b, employee e
+            where 1=1
+            and b.emp_no = e.emp_no
+            and board_code = 1
+            order by board_no desc
+         ) a
+      ) b
+      <![CDATA[
+      where b.rnum >= 1 and b.rnum <= 5
+      ]]>
+   </select>
+
+   
+   
+
+
+
+
+</mapper>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.statistics.mapper.StatisticMapper">
+	<resultMap type="dclz" id="dclzMap">
+		<id column="dclz_no" property="dclzNo"/>
+		<result column="dclz_no" property="dclzNo"/>
+		<result column="emp_no" property="empNo"/>
+		<result column="gowk_date" property="gowkDate"/>
+		<result column="lvwk_date" property="lvwkDate"/>
+		<result column="dclz_type" property="dclzType"/>
+		<result column="cal_title" property="calTitle"/>
+		<result column="cal_class_name" property="calClassName"/>
+		<result column="hours_minutes" property="hoursMinutes"/>
+		<result column="emp_name" property="empName"/>
+		<result column="cal_color" property="calColor"/>
+		<collection property="employee" resultMap="empMap"/>
+		<collection property="dept" resultMap="deptMap"/>
+	</resultMap>
+	
+	<resultMap type="employee" id="empMap">
+		<id property="empNo" column="emp_no"/>
+	    <result property="deptCode" column="dept_code"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="empPw" column="emp_pw"/>
+	    <result property="empTel" column="emp_tel"/>
+	    <result property="extNo" column="ext_no"/>
+	    <result property="empEmail" column="emp_email"/>
+	    <result property="empPsnEmail" column="emp_psn_email"/>
+	    <result property="empBirth" column="emp_birth"/>
+	    <result property="empRrn" column="emp_rrn"/>
+	    <result property="empZip" column="emp_zip"/>
+	    <result property="empAddr1" column="emp_addr1"/>
+	    <result property="empAddr2" column="emp_addr2"/>
+	    <result property="signImg" column="sign_img"/>
+	    <result property="accountNo" column="account_no"/>
+	    <result property="joinDay" column="join_day"/>
+	    <result property="leaveDay" column="leave_day"/>
+	    <result property="yrycCount" column="yryc_count"/>
+	    <result property="positionCode" column="position_code"/>
+	    <result property="position" column="position"/>
+	    <result property="dutyCode" column="duty_code"/>
+	    <result property="duty" column="duty"/>
+	    <result property="bankCode" column="bank_code"/>
+	    <result property="bank" column="bank"/>
+	    <result property="hffcStatus" column="hffc_status"/>
+	    <result property="hffc" column="hffc"/>
+	    <result property="enabled" column="enabled"/>
+	    <result property="adminYn" column="admin_yn"/>
+	</resultMap>
+	
+	<resultMap type="dept" id="deptMap">
+		<id property="deptCode" column="deptCode"/>
+	    <result property="deptCode" column="dept_code"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="deptRegDay" column="dept_reg_day"/>
+	    <result property="deptDelDay" column="dept_del_day"/>
+	</resultMap>
+	
+	<resultMap type="approval" id="approvalMap">
+	    <result property="apprvOrder" column="apprv_order"/>
+	    <result property="drftNo" column="drft_no"/>
+	    <result property="empNo" column="emp_no"/>
+	    <result property="apprvSignerName" column="apprv_signer_name"/>
+	    <result property="apprvSignerDeptName" column="apprv_signer_dept_name"/>
+	    <result property="apprvSignerPositionName" column="apprv_signer_position_name"/>
+	    <result property="apprvSignImg" column="apprv_sign_img"/>
+	    <result property="apprvDate" column="apprv_date"/>
+	    <result property="apprvStatus" column="apprv_status"/>
+	    <result property="apprvReject" column="apprv_reject"/>
+	    <result property="apprvFinalYn" column="apprv_final_yn"/>
+	    <association property="employee" resultMap="empMap"/>
+		<association property="dept" resultMap="deptMap"/>
+	</resultMap>
+	
+	<select id="selectAllDclzCount" parameterType="map" resultType="int">
+		select
+			count(cal_title)
+		from dclz d, employee e
+		where 1=1
+		and d.emp_no = e.emp_no
+		and cal_title = #{calTitle}
+        and SUBSTR(d.dclz_no, 1, 4) = TO_CHAR(SYSDATE, 'YYMM')
+	</select>
+	
+	<select id="selectDclzYear" resultType="int">
+		select distinct
+		    EXTRACT(YEAR FROM GOWK_DATE) AS Year
+		from dclz
+	</select>
+	
+	<select id="someDclzStatusCount" resultType="int">
+		select
+			count(cal_title)
+		from dclz d, employee e
+		where 1=1
+		and d.emp_no = e.emp_no
+		and cal_title = #{calTitle}
+        and SUBSTR(d.dclz_no, 1, 4) = #{someday}
+	</select>
+	
+	<select id="selectEmpDclzListByDay" parameterType="string" resultMap="dclzMap">
+		select 
+		      dclz_no
+		    , d.emp_no
+		    , to_char(gowk_date,'yyyy-mm-dd')
+		    , to_char(lvwk_date,'yyyy-mm-dd')
+		    , cal_title
+		    , cal_class_name	
+		    , cal_color
+		    , hours_minutes
+		    , e.emp_name
+		    , e.dept_code
+		    , dp.dept_name
+		from dclz d, employee e, dept dp
+		where 1=1
+		and d.emp_no = e.emp_no
+		and e.dept_code = dp.dept_code
+		and dp.dept_del_day IS NULL
+		and to_char(gowk_date,'yyyy-mm-dd') = #{day}
+	</select>
+	
+	<select id="selectAllDept" resultType="dept">
+		select
+			  dept_code
+			, dept_name
+			, dept_reg_day
+			, dept_del_day
+		from dept
+		where dept_del_day IS NULL
+	</select>
+	
+	<select id="selectDeptDclzList" resultMap="dclzMap">
+		select 
+		      dclz_no
+		    , d.emp_no
+		    , to_char(gowk_date,'yyyy-mm-dd')
+		    , to_char(lvwk_date,'yyyy-mm-dd')
+		    , cal_title
+		    , cal_class_name	
+		    , cal_color
+		    , hours_minutes
+		    , e.emp_name
+		    , e.dept_code
+		    , dp.dept_name
+		from dclz d, employee e, dept dp
+		where 1=1
+		and d.emp_no = e.emp_no
+		and e.dept_code = dp.dept_code
+		and e.dept_code = #{deptCode}
+		and dp.dept_del_day IS NULL
+		and d.cal_title = #{calTitle}
+		and SUBSTR(d.dclz_no, 1, 4) = #{someday}
+	</select>
+	
+	<select id="selectAllDeptDclzList" resultMap="dclzMap">
+		select 
+		      dclz_no
+		    , d.emp_no
+		    , to_char(gowk_date,'yyyy-mm-dd')
+		    , to_char(lvwk_date,'yyyy-mm-dd')
+		    , cal_title
+		    , cal_class_name	
+		    , cal_color
+		    , hours_minutes
+		    , e.emp_name
+		    , e.dept_code
+		    , dp.dept_name
+		from dclz d, employee e, dept dp
+		where 1=1
+		and d.emp_no = e.emp_no
+		and e.dept_code = dp.dept_code
+		and e.dept_code = #{deptCode}
+		and dp.dept_del_day IS NULL
+		and SUBSTR(d.dclz_no, 1, 4) = #{someday}
+	</select>
+	
+	<select id="selectApprovalList" parameterType="string" resultType="approval">
+		select
+		    apprv_order,
+		    drft_no,
+		    emp_no,
+		    apprv_signer_name,
+		    apprv_signer_dept_name,
+		    apprv_signer_position_name,
+		    apprv_sign_img,
+		    apprv_date,
+		    apprv_status,
+		    apprv_reject,
+		    apprv_final_yn
+		from approval
+		where SUBSTR(drft_no,1,6) = #{someday}
+	</select>
+	
+	<select id="selectApprvYear" resultType="int">
+		select distinct
+		    SUBSTR(drft_no,1,4) AS Year
+		from approval
+	</select>
+	
+	<select id="selectEmpDraftList" resultMap="approvalMap">
+		select 
+		      apprv_order
+		    , drft_no
+		    , a.emp_no
+		    , apprv_signer_name
+		    , apprv_signer_dept_name
+		    , apprv_signer_position_name
+		    , apprv_sign_img
+		    , apprv_date
+		    , apprv_status
+		    , apprv_reject
+		    , apprv_final_yn
+		    , e.emp_name
+		    , e.dept_code
+		    , d.dept_name
+		    , (SELECT common_code_name FROM common_code WHERE common_code_group_id = 100 AND common_code = e.position_code) position
+		from approval a, employee e, dept d
+		where 1=1
+		and a.emp_no = e.emp_no
+		and e.dept_code = d.dept_code
+		<if test="deptCode != null and deptCode != ''">
+			and e.dept_code = #{deptCode}
+			and d.dept_del_day IS NULL
+		</if>
+		<if test="startDate != null and startDate != ''">
+			<![CDATA[
+				and SUBSTR(a.drft_no,1,8) >= #{startDate}
+			]]>
+		</if>
+		<if test="endDate != null and endDate != ''">
+			<![CDATA[
+				and SUBSTR(a.drft_no,1,8) <= #{endDate}
+			]]>
+		</if>
+	</select>
+	
+	<select id="selectRejectReasonList" resultType="string">
+		select apprv_reject
+		from approval
+		where apprv_reject IS NOT NULL
+	</select>
+</mapper>

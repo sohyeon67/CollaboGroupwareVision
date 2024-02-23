@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.email.mapper.EmailMapper">
+
+	<resultMap type="mail" id="mailMap">
+		<id column="mail_no" property="mailNo"/>
+		<result column="mail_no" property="mailNo"/>
+		<result column="emp_no" property="empNo"/>
+		<result column="mail_title" property="mailTitle"/>
+		<result column="mail_content" property="mailContent"/>
+		<result column="send_date" property="sendDate"/>
+		<result column="reserve_date" property="reserveDate"/>
+		<result column="important" property="important"/>
+		<result column="mail_status" property="mailStatus"/>
+		<result column="mail_box_status" property="mailBoxStatus"/>
+		<association property="employee" resultMap="empMap"/>
+		<collection property="mailReceiveList" resultMap="mailReceiveMap"/>
+		<collection property="mailAttachList" resultMap="mailAttachMap"/>
+	</resultMap>
+	
+	<resultMap type="mailReceive" id="mailReceiveMap">
+		<result column="emp_no" property="empNo"/>
+		<result column="mail_no" property="mailNo"/>
+		<result column="receive_date" property="receiveDate"/>
+		<result column="important" property="important"/>
+		<result column="mail_status" property="mailStatus"/>
+		<result column="mail_read_yn" property="mailReadYn"/>
+		<association property="employee" resultMap="empMap"/>
+	</resultMap>
+	
+	<resultMap type="mailAttach" id="mailAttachMap">
+		<id column="file_no" property="fileNo"/>
+		<result column="file_no" property="fileNo"/>
+		<result column="mail_no" property="mailNo"/>
+		<result column="file_name" property="fileName"/>
+		<result column="file_savepath" property="fileSavepath"/>
+		<result column="file_mimetype" property="fileMimetype"/>
+		<result column="file_size" property="fileSize"/>
+		<result column="file_fancysize" property="fileFancysize"/>
+	</resultMap>
+
+	<resultMap type="employee" id="empMap">
+		<id property="empNo" column="emp_no"/>
+	    <result property="deptCode" column="dept_code"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="empPw" column="emp_pw"/>
+	    <result property="empTel" column="emp_tel"/>
+	    <result property="extNo" column="ext_no"/>
+	    <result property="empEmail" column="emp_email"/>
+	    <result property="empPsnEmail" column="emp_psn_email"/>
+	    <result property="empBirth" column="emp_birth"/>
+	    <result property="empRrn" column="emp_rrn"/>
+	    <result property="empZip" column="emp_zip"/>
+	    <result property="empAddr1" column="emp_addr1"/>
+	    <result property="empAddr2" column="emp_addr2"/>
+	    <result property="signImg" column="sign_img"/>
+	    <result property="accountNo" column="account_no"/>
+	    <result property="joinDay" column="join_day"/>
+	    <result property="leaveDay" column="leave_day"/>
+	    <result property="yrycCount" column="yryc_count"/>
+	    <result property="positionCode" column="position_code"/>
+	    <result property="position" column="position"/>
+	    <result property="dutyCode" column="duty_code"/>
+	    <result property="duty" column="duty"/>
+	    <result property="bankCode" column="bank_code"/>
+	    <result property="bank" column="bank"/>
+	    <result property="hffcStatus" column="hffc_status"/>
+	    <result property="hffc" column="hffc"/>
+	    <result property="enabled" column="enabled"/>
+	    <result property="adminYn" column="admin_yn"/>
+	</resultMap>
+	
+	<sql id="mailSearch">
+		<if test="searchType != null and searchType == 'title'">
+			and (m.mail_title like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'content'">
+			and (m.mail_content like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'empName'">
+			and (e.emp_name like '%'||#{searchWord}||'%')
+		</if>
+	</sql> 
+	
+	<insert id="insertMail" parameterType="mail" useGeneratedKeys="true">
+		<selectKey keyProperty="mailNo" resultType="int" order="BEFORE">
+			select seq_mail.nextval from dual
+		</selectKey>
+		insert into mail(
+			mail_no, emp_no, mail_title, mail_content, send_date, reserve_date, important, mail_status
+		) values (
+			#{mailNo}, #{empNo}, #{mailTitle}, #{mailContent}, sysdate, null, 'N', '01'
+		)
+	</insert>
+	
+	<insert id="insertMailReceiver" parameterType="mailReceive">
+		insert into mail_receive(
+			emp_no, mail_no, receive_date, important, mail_status, mail_read_yn
+		) values (
+			#{empNo}, #{mailNo}, sysdate, 'N', '01', 'N'
+		)
+	</insert>
+	
+	<insert id="insertMailAttach" parameterType="mailAttach" useGeneratedKeys="true">
+		<selectKey keyProperty="fileNo" resultType="int" order="BEFORE">
+			select seq_mail_attach.nextval from dual
+		</selectKey>
+		insert into mail_attach(
+			file_no, mail_no, file_name, file_savepath, file_mimetype, file_size, file_fancysize
+		) values (
+			#{fileNo}, #{mailNo}, #{fileName}, #{fileSavepath}, #{fileMimetype}, #{fileSize}, #{fileFancysize}
+		)
+	</insert>
+	
+	<select id="selectMailReceiveList" parameterType="mailPaging" resultMap="mailMap">
+		select
+			b.*
+		from(	
+			select
+				a.*, row_number() over (order by a.mail_no desc) rnum
+			from(
+				select
+					mr.mail_no as mail_no, m.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+					, mr.important, mr.mail_status, e.emp_name, mr.mail_read_yn
+				from mail m, mail_receive mr, employee e
+				where 1=1
+				and m.mail_no = mr.mail_no
+				and m.emp_no = e.emp_no
+				and mr.emp_no = #{empNo}
+				and mr.mail_status = '01'
+				and mr.mail_del_yn = 'N'
+				<include refid="mailSearch"/>
+				order by m.mail_no desc
+			) a
+		) b
+		<![CDATA[
+			where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="selectNoReadCount" parameterType="string" resultType="int">
+		  select
+			count(mr.mail_no)
+		from mail m, mail_receive mr
+		where m.mail_no = mr.mail_no
+		and mr.emp_no = #{empNo}
+		and mr.mail_read_yn = 'N'
+        and mr.mail_status = '01'
+	</select>
+	
+	<select id="selectMailSentList" parameterType="string" resultMap="mailMap">
+		select
+			b.*
+		from(	
+			select
+				a.*, row_number() over (order by a.mail_no desc) rnum
+			from(
+				select
+					m.mail_no as mail_no, mr.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+					, m.important, m.mail_status, e.emp_name
+				from mail m, mail_receive mr, employee e
+				where m.mail_no = mr.mail_no
+				and mr.emp_no = e.emp_no
+				and m.emp_no = #{empNo}
+				and m.mail_status = '01'
+				and m.mail_del_yn = 'N'
+				<include refid="mailSearch"/>
+				order by mr.mail_no desc
+			) a
+		) b
+		<![CDATA[
+			where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="selectDetailMail" parameterType="int" resultMap="mailMap">
+		select
+		    m.mail_no, m.emp_no, mail_title, mail_content, send_date
+		    , reserve_date, important, mail_status, mail_box_status
+		    , e.emp_name, e.emp_email, e.emp_psn_email, e.profile_img_path
+		    , ma.file_no, ma.mail_no, ma.file_name, ma.file_savepath
+		    , ma.file_mimetype, ma.file_size, ma.file_fancysize
+		from mail m 
+		inner join employee e on m.emp_no = e.emp_no 
+		left outer join  mail_attach ma on m.mail_no = ma.mail_no
+		where m.mail_no = #{mailNo}
+	</select>
+	
+	<select id="selectDetailMailReceive" parameterType="int" resultType="mailReceive">
+		select
+			emp_no, mail_no, receive_date, important, mail_status, mail_read_yn
+		from mail_receive
+		where mail_no = #{mailNo}
+	</select>
+	
+	<update id="updateReadYes">
+		update mail_receive
+		set 
+			mail_read_yn = 'Y'
+		where mail_no = #{mailNo}
+		and emp_no = #{empNo}
+	</update>
+	
+	<select id="selectFileInfo" parameterType="int" resultType="mailAttach">
+		select
+			file_no, mail_no, file_name, file_savepath, file_mimetype, file_size, file_fancysize
+		from mail_attach
+		where file_no = #{fileNo}
+	</select>
+	
+	<select id="selectMailTrashList" parameterType="string" resultMap="mailMap">
+	    select 
+	        c.*
+	    from (select
+			    b.*, row_number() over (order by b.mail_no desc) rnum
+			from(    
+			    select
+			        a.*
+			    from(
+			        select
+			            mr.mail_no as mail_no, m.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+			            , mr.important, mr.mail_status, e.emp_name, mr.mail_read_yn
+			        from mail m, mail_receive mr, employee e
+			        where 1=1
+			        and m.mail_no = mr.mail_no
+			        and m.emp_no = e.emp_no
+			        and mr.emp_no = #{empNo}
+			        and mr.mail_status = '00'
+			        and mr.mail_del_yn = 'N'
+			        <include refid="mailSearch"/>
+			        order by m.mail_no desc
+			    ) a
+	        
+			    UNION ALL
+	
+			    select
+			        a.*
+			    from(
+			        select
+			            m.mail_no as mail_no, mr.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+			            , m.important, m.mail_status, e.emp_name, mr.mail_read_yn 
+			        from mail m, mail_receive mr, employee e
+			        where m.mail_no = mr.mail_no
+			        and mr.emp_no = e.emp_no
+			        and m.emp_no = #{empNo}
+			        and m.mail_status = '00'
+			        and m.mail_del_yn = 'N'
+			        <include refid="mailSearch"/>
+			        order by mr.mail_no desc
+			    ) a
+			) b
+	    ) c
+	    <![CDATA[
+			where c.rnum >= #{startRow} and c.rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="selectMailReceiveCount" parameterType="mailPaging" resultType="int">
+		select count(mr.mail_no)
+		from mail m, mail_receive mr, employee e
+		where 1=1
+		and m.mail_no = mr.mail_no
+		and m.emp_no = e.emp_no
+		and mr.emp_no = #{empNo}
+		and mr.mail_status = '01'
+		and mr.mail_del_yn = 'N'
+		<include refid="mailSearch"/>
+	</select>
+	
+	<select id="selectMailSentCount" parameterType="mailPaging" resultType="int">
+		select
+			count(a.mail_no)
+		from(
+			select
+				m.mail_no as mail_no, mr.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+				, m.important, m.mail_status, e.emp_name, ROW_NUMBER() OVER(PARTITION BY m.mail_no ORDER BY m.mail_no DESC) AS rnum
+			from mail m, mail_receive mr, employee e
+			where m.mail_no = mr.mail_no
+			and mr.emp_no = e.emp_no
+			and m.emp_no = #{empNo}
+			and m.mail_status = '01'
+			and m.mail_del_yn = 'N'
+			order by mr.mail_no desc
+			<include refid="mailSearch"/>
+		) a
+		where a.rnum = 1
+        ORDER BY a.mail_no
+	</select>
+	
+	<select id="selectMailTrashCount" parameterType="mailPaging" resultType="int">
+		select
+		    count(b.mail_no)
+		from(    
+		    select
+		        a.*
+		    from(
+		        select
+		            mr.mail_no as mail_no, m.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+		            , mr.important, mr.mail_status, e.emp_name, mr.mail_read_yn, row_number() over(partition by mr.mail_no order by mr.mail_no desc) as rnum 
+		        from mail m, mail_receive mr, employee e
+		        where 1=1
+		        and m.mail_no = mr.mail_no
+		        and m.emp_no = e.emp_no
+		        and mr.emp_no = #{empNo}
+		        and mr.mail_status = '00'
+		        and mr.mail_del_yn = 'N'
+		         <include refid="mailSearch"/>
+		        order by m.mail_no desc
+		    ) a
+		
+		    UNION ALL
+		
+		    select
+		        a.*
+		    from(
+		        select
+		            m.mail_no as mail_no, mr.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+		            , m.important, m.mail_status, e.emp_name, mr.mail_read_yn , row_number() over(partition by m.mail_no order by m.mail_no desc) as rnum 
+		        from mail m, mail_receive mr, employee e
+		        where m.mail_no = mr.mail_no
+		        and mr.emp_no = e.emp_no
+		        and m.emp_no = #{empNo}
+		        and m.mail_status = '00'
+		        and m.mail_del_yn = 'N'
+		         <include refid="mailSearch"/>
+		        order by mr.mail_no desc
+		    ) a
+		) b
+        where b.rnum = 1
+       	ORDER BY b.mail_no
+	</select>
+	
+	<update id="inboxTempDelMail">
+		update mail_receive
+		set 
+			mail_status = '00',
+			mail_read_yn = 'Y'
+		where mail_no = #{mailNo}
+		and emp_no = #{empNo}
+	</update>
+	
+	<update id="sentBoxTempDelMail" parameterType="int">
+		update mail
+		set 
+			mail_status = '00'
+		where mail_no = #{mailNo}
+	</update>
+	
+	<update id="restoreIndexMail">
+		update mail_receive
+		set 
+			mail_status = '01'
+		where mail_no = #{mailNo}
+		and emp_no = #{empNo}
+	</update>
+	
+	<update id="restoreSentMail" parameterType="int">
+		update mail
+		set 
+			mail_status = '01'
+		where mail_no = #{mailNo}
+	</update>
+	
+	<update id="updateMailBoxStatus">
+		update mail
+		set 
+			mail_box_status = #{mailBoxStatus}
+		where mail_no = #{mailNo}
+	</update>
+	
+	<update id="deleteIndexMail">
+		update mail_receive
+		set 
+			mail_del_yn = 'Y'
+		where mail_no = #{mailNo}
+		and emp_no = #{empNo}
+	</update>
+	
+	<update id="deleteSentMail" parameterType="int">
+		update mail
+		set 
+			mail_del_yn = 'Y'
+		where mail_no = #{mailNo}
+	</update>
+	
+	<select id="selectImportantCount" parameterType="mailPaging" resultType="int">
+		select
+		    count(b.mail_no)
+		from(    
+		    select
+		        a.*
+		    from(
+		        select
+		            mr.mail_no as mail_no, m.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+		            , mr.important, mr.mail_status, e.emp_name, mr.mail_read_yn, row_number() over(partition by mr.mail_no order by mr.mail_no desc) as rnum 
+		        from mail m, mail_receive mr, employee e
+		        where 1=1
+		        and m.mail_no = mr.mail_no
+		        and m.emp_no = e.emp_no
+		        and mr.emp_no = #{empNo}
+		        and mr.important = 'Y'
+		        and mr.mail_del_yn = 'N'
+		        and mr.mail_status = '01'
+		         <include refid="mailSearch"/>
+		        order by m.mail_no desc
+		    ) a
+		
+		    UNION ALL
+		
+		    select
+		        a.*
+		    from(
+		        select
+		            m.mail_no as mail_no, mr.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+		            , m.important, m.mail_status, e.emp_name, mr.mail_read_yn , row_number() over(partition by m.mail_no order by m.mail_no desc) as rnum 
+		        from mail m, mail_receive mr, employee e
+		        where m.mail_no = mr.mail_no
+		        and mr.emp_no = e.emp_no
+		        and m.emp_no = #{empNo}
+		        and m.important = 'Y'
+		        and m.mail_del_yn = 'N'
+		        and m.mail_status = '01'
+		         <include refid="mailSearch"/>
+		        order by mr.mail_no desc
+		    ) a
+		) b
+        where b.rnum = 1
+       	ORDER BY b.mail_no
+	</select>
+	
+	<select id="selectImportantList" parameterType="mailPaging" resultMap="mailMap">
+		select 
+	        c.*
+	    from (select
+			    b.*, row_number() over (order by b.mail_no desc) rnum
+			from(    
+			    select
+			        a.*
+			    from(
+			        select
+			            mr.mail_no as mail_no, m.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+			            , mr.important, mr.mail_status, e.emp_name, mr.mail_read_yn
+			        from mail m, mail_receive mr, employee e
+			        where 1=1
+			        and m.mail_no = mr.mail_no
+			        and m.emp_no = e.emp_no
+			        and mr.emp_no = #{empNo}
+			        and mr.important = 'Y'
+			        and mr.mail_del_yn = 'N'
+			        and mr.mail_status = '01'
+			        <include refid="mailSearch"/>
+			        order by m.mail_no desc
+			    ) a
+	        
+			    UNION ALL
+	
+			    select
+			        a.*
+			    from(
+			        select
+			            m.mail_no as mail_no, mr.emp_no, m.mail_title, m.mail_content, m.send_date, m.reserve_date
+			            , m.important, m.mail_status, e.emp_name, mr.mail_read_yn 
+			        from mail m, mail_receive mr, employee e
+			        where m.mail_no = mr.mail_no
+			        and mr.emp_no = e.emp_no
+			        and m.emp_no = #{empNo}
+			        and m.important = 'Y'
+			        and m.mail_del_yn = 'N'
+			        and m.mail_status = '01'
+			        <include refid="mailSearch"/>
+			        order by mr.mail_no desc
+			    ) a
+			) b
+	    ) c
+	    <![CDATA[
+			where c.rnum >= #{startRow} and c.rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<update id="updateInboxImportantMail">
+		update mail_receive
+		set 
+			important = #{importantYN}
+		where mail_no = #{mailNo}
+		and emp_no = #{empNo}
+	</update>
+	
+	<update id="updateSentMailImportantMail">
+		update mail
+		set 
+			important = #{importantYN}
+		where mail_no = #{mailNo}
+	</update>
+</mapper>

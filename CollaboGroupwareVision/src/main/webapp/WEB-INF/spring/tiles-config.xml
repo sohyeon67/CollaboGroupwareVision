@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<definition name="loginTemplate" template="/WEB-INF/views/loginTemplate.jsp"/>
+	
+	<definition name="conn/*" extends="loginTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/account/{1}.jsp"/>
+	</definition>
+
+	<definition name="mainTemplate" template="/WEB-INF/views/mainTemplate.jsp">
+		<put-attribute name="header" value="/WEB-INF/views/tiles/header.jsp"/>
+		<put-attribute name="footer" value="/WEB-INF/views/tiles/footer.jsp"/>
+		<put-attribute name="mainNavigator" value="/WEB-INF/views/tiles/mainNavigator.jsp"/>
+		<put-attribute name="adminNavigator" value="/WEB-INF/views/tiles/adminNavigator.jsp"/>
+		<put-attribute name="setting" value="/WEB-INF/views/tiles/setting.jsp"/>
+	</definition>
+	
+	<definition name="main/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/{1}.jsp"/>
+	</definition>
+	
+	<definition name="chatting/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/chat/{1}.jsp"/>
+	</definition>
+	
+	<definition name="dclz/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/dclz/{1}.jsp"/>
+	</definition>
+	
+	<definition name="crtf/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/crtf/{1}.jsp"/>
+	</definition>
+	
+	<definition name="board/*/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/board/{1}/{2}.jsp"/>
+	</definition>
+	
+	<definition name="notice/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/notice/{1}.jsp"/>
+	</definition>
+	
+	<definition name="department/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/department/{1}.jsp"/>
+	</definition>
+	
+	<definition name="survey/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/survey/{1}.jsp"/>
+	</definition>
+	
+	<definition name="drafting/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/drafting/{1}.jsp"/>
+	</definition>
+	
+	<definition name="email/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/email/{1}.jsp"/>
+	</definition>
+	
+	<definition name="org/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/org/{1}.jsp"/>
+	</definition>
+	
+	<definition name="calendar/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/calendar/{1}.jsp"/>
+	</definition>
+
+	<definition name="todo/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/todo/{1}.jsp"/>
+	</definition>
+
+	<definition name="drive/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/drive/{1}.jsp"/>
+	</definition>
+	
+	<definition name="mer/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/reservation/mer/{1}.jsp"/>
+	</definition>
+	
+	<definition name="vhcl/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/reservation/vhcl/{1}.jsp"/>
+	</definition>
+	
+	<definition name="account/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/account/{1}.jsp"/>
+	</definition>
+	
+	<definition name="artic/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/article/{1}.jsp"/>
+	</definition>
+	
+	<definition name="stat/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/statistics/{1}.jsp"/>
+	</definition>
+	
+	<definition name="project/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/project/{1}.jsp"/>
+	</definition>
+	
+	<definition name="com/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/community/{1}.jsp"/>
+	</definition>
+	
+</tiles-definitions>
