@@ -45,6 +45,9 @@
 ### 사원 홈
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/9ca4a15d-4812-4f8f-ad4f-97be84a80e13)
 
+### 마이페이지
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/5c04d667-35bc-40fa-a9e9-669f9914969d)
+
 ### 프로젝트 - 홈
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/a8815888-0dd7-41b8-929a-ba26e0e8813b)
 
@@ -74,6 +77,7 @@
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/213932e6-70e4-4397-b569-5a1cf872323e)
 
 ### 근태
+채울 예정
 
 ### 서류발급
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/95bd56bf-cb4c-4ca8-960c-c3b13a8eb0e0)
