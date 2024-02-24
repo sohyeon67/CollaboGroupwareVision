@@ -175,7 +175,7 @@
 		SELECT
 		      emp_no
 		    , emp_name
-		    , get_common_code_name('100', e.position_code) position
+		    , get_common_code_name('100', position_code) position
 		    , emp_tel
 		    , emp_del_day
 		FROM employee
