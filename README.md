@@ -73,6 +73,8 @@
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/f6f35797-3fc1-4827-8c92-967aafd845fe)
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/213932e6-70e4-4397-b569-5a1cf872323e)
 
+### 근태
+
 ### 서류발급
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/95bd56bf-cb4c-4ca8-960c-c3b13a8eb0e0)
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/07f68f3b-4b6d-4b67-ab43-b30c4adfd426)
@@ -106,14 +108,16 @@
 
 ### 관리자 - 프로젝트 관리
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/36e60cb2-4e6b-449a-9965-874aea323ccd)
-추가 예정
-
+![dd](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/986cee70-20e7-494d-9cd5-1fb0e4aee23a)
 
 ### 관리자 - 예약관리
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/f88009ea-a60c-4de5-a193-1629c40e47a5)
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/057707dc-3ad3-47aa-8cce-9a2fd25d72db)
 
 ### 관리자 - 조직관리
-추가예정
-
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/695598b6-ea8f-4a2b-9fb6-0a7df363f3ba)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/8bd8e78d-0d54-46d7-a057-c775f8b95c4b)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/4c3c5ce7-29f2-4d92-a91b-8b855d43ca50)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/08295fa5-46c7-4232-b4bb-dccc66c2b377)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/283f8815-1b73-445d-a6e6-8538c8714eb0)
 
