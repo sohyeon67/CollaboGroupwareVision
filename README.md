@@ -59,8 +59,61 @@
 ### 프로젝트 - 간트차트
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d25d1397-8bd6-460e-a545-1a0621b058dd)
 
+### 게시판
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/bb52a4f6-0956-4c68-ae9c-38c5df27b1d0)
+
+### 커뮤니티
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/70b7f23e-5950-4bef-b4d9-dadf73b84018)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/714d0381-3181-4544-98f4-65e3ba771975)
+
+### 캘린더
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/2d94a564-4c89-4f86-9b46-4ac60f42ff1d)
+
+### 예약
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/f6f35797-3fc1-4827-8c92-967aafd845fe)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/213932e6-70e4-4397-b569-5a1cf872323e)
+
+### 서류발급
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/95bd56bf-cb4c-4ca8-960c-c3b13a8eb0e0)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/07f68f3b-4b6d-4b67-ab43-b30c4adfd426)
+
+### 실시간 뉴스
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/2ac9515f-4008-4a2e-8f97-c35b95ff765b)
 
 ### 조직도
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/6cb69603-55e2-4f24-9292-4cf5bdf36eff)
+
+### 전자결재
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d0670c3e-d677-4c97-b197-457ad7b1461b)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/ccd3f763-5d33-4449-b5b3-e8e433854fa3)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d1aa1932-22af-42ec-9990-39879c116474)
+
+### 드라이브
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/1f7f425a-f2ae-4b93-ae96-5bf95bc0b5a8)
+
+### 메일
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/6ad61037-2512-42ef-ad17-1a5d5db26a8e)
+
+### 채팅
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/b01b707a-6a5f-448f-8911-d61936e82637)
+
+### 관리자 - 통계
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/3eb915d8-1848-4117-bac3-f38829c70be7)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/1032c27f-05bb-421e-a446-0ff9cc5e47ea)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/97643db0-8674-49e3-8bb8-e1f024afd3b7)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/021ca78e-681e-4564-94d6-8cb851fdea45)
+
+
+### 관리자 - 프로젝트 관리
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/36e60cb2-4e6b-449a-9965-874aea323ccd)
+추가 예정
+
+
+### 관리자 - 예약관리
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/f88009ea-a60c-4de5-a193-1629c40e47a5)
+![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/057707dc-3ad3-47aa-8cce-9a2fd25d72db)
+
+### 관리자 - 조직관리
+추가예정
 
 
