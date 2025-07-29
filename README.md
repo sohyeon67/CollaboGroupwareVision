@@ -63,65 +63,88 @@
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d25d1397-8bd6-460e-a545-1a0621b058dd)
 
 ### 게시판
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/bb52a4f6-0956-4c68-ae9c-38c5df27b1d0)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/c1c0e3b1-d80f-4000-97ef-bc2203c81ff1" />
+
 
 ### 커뮤니티
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/70b7f23e-5950-4bef-b4d9-dadf73b84018)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/714d0381-3181-4544-98f4-65e3ba771975)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/90c7a426-08e5-4cfa-84fa-6567d3d20b7b" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/40cce2e3-9dac-41f9-a332-25374b76edd5" />
+
 
 ### 캘린더
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/2d94a564-4c89-4f86-9b46-4ac60f42ff1d)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/e0a57439-355e-4edd-8608-91beb2c0367b" />
+
 
 ### 예약
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/f6f35797-3fc1-4827-8c92-967aafd845fe)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/213932e6-70e4-4397-b569-5a1cf872323e)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/f3d9d674-687a-403e-9f54-3d39252ff5fa" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/1d34539a-b623-4bc3-b7bf-93a52b7d035a" />
+
 
 ### 근태
-채울 예정
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/0f811d68-29b7-4b0e-9dbb-9c78f783d448" />
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/32dc1bd7-158a-450a-a688-9585a0e591b6" />
+
 
 ### 서류발급
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/95bd56bf-cb4c-4ca8-960c-c3b13a8eb0e0)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/ea459bfd-6656-4b20-88aa-3d87ea124909" />
+
 ![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/07f68f3b-4b6d-4b67-ab43-b30c4adfd426)
 
 ### 실시간 뉴스
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/2ac9515f-4008-4a2e-8f97-c35b95ff765b)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/0b21f968-e6ec-4481-875e-7653a0cdb25f" />
+
 
 ### 조직도
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/6cb69603-55e2-4f24-9292-4cf5bdf36eff)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/6d1a31fd-bc17-4398-887d-09a0a3365425" />
 
 ### 전자결재
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d0670c3e-d677-4c97-b197-457ad7b1461b)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/ccd3f763-5d33-4449-b5b3-e8e433854fa3)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/d1aa1932-22af-42ec-9990-39879c116474)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/8aa5dd68-c749-4fa2-8c93-8005ebc12270" />
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/e450d491-ec81-4c99-b10c-aeb623bb13ce" />
 
 ### 드라이브
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/1f7f425a-f2ae-4b93-ae96-5bf95bc0b5a8)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/15877bca-fa1d-4df7-b91e-ca0891f3ee8d" />
 
 ### 메일
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/6ad61037-2512-42ef-ad17-1a5d5db26a8e)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/40b52ae9-dc27-433a-9050-ea4922460665" />
 
 ### 채팅
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/b01b707a-6a5f-448f-8911-d61936e82637)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/25ab2ec8-52de-41e5-8ea2-1b72f579c4e7" />
+
 
 ### 관리자 - 통계
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/3eb915d8-1848-4117-bac3-f38829c70be7)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/1032c27f-05bb-421e-a446-0ff9cc5e47ea)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/97643db0-8674-49e3-8bb8-e1f024afd3b7)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/021ca78e-681e-4564-94d6-8cb851fdea45)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/4d4dc73c-1732-4a48-a857-7ae35b8f076d" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/366043fa-071e-485e-aab9-8212c01e09a9" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/4b7ac11c-777a-49c3-a90f-629d6ad58f6b" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/a87d6e88-5dce-4931-81a7-2525e8b91e2a" />
+
 
 
 ### 관리자 - 프로젝트 관리
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/36e60cb2-4e6b-449a-9965-874aea323ccd)
-![dd](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/986cee70-20e7-494d-9cd5-1fb0e4aee23a)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/c2d798ab-64f1-4401-ac43-b6ccca7e862e" />
+
+![프로젝트 생성](https://github.com/user-attachments/assets/36116666-aec7-4a84-aa6b-401723d4d617)
+
 
 ### 관리자 - 예약관리
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/f88009ea-a60c-4de5-a193-1629c40e47a5)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/057707dc-3ad3-47aa-8cce-9a2fd25d72db)
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/041f1fb3-f405-4b64-8050-a614124ae68d" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/25e71cc0-c2b7-4bd4-97b1-d17e20ea0b36" />
+
 
 ### 관리자 - 조직관리
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/695598b6-ea8f-4a2b-9fb6-0a7df363f3ba)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/8bd8e78d-0d54-46d7-a057-c775f8b95c4b)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/4c3c5ce7-29f2-4d92-a91b-8b855d43ca50)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/08295fa5-46c7-4232-b4bb-dccc66c2b377)
-![image](https://github.com/sohyeon67/CollaboGroupwareVision/assets/77038550/283f8815-1b73-445d-a6e6-8538c8714eb0)
+![부서관리](https://github.com/user-attachments/assets/065ec656-82c0-47c3-8e68-c7cb4482ca39)
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/b7de02fb-b155-4c5e-9fd6-cb632970638a" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/95c69a56-9df4-4133-bd29-e4e4aa32e5eb" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/041a4f44-2b0d-4ed4-80eb-f7288037d47d" />
+
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/a99bad36-bbae-40ce-8643-bf81e5f33b1c" />
+
 
