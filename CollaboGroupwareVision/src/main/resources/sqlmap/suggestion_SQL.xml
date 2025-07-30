@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.suggestion.mapper.suggestionMapper">
+
+	<resultMap type="board" id="boardMap">
+		<id column="board_no" property="boardNo"/>
+		<result column="board_no" property="boardNo"/>
+		<result column="board_code" property="boardCode"/>
+		<result column="board_title" property="boardTitle"/>
+		<result column="board_content" property="boardContent"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="update_date" property="updateDate"/>
+		<result column="inq_cnt" property="inqCnt"/>
+		<result column="temp_yn" property="tempYn"/>
+		<result column="emp_name" property="empName"/>
+		<collection property="employee" resultMap="empMap"/>
+	</resultMap>
+	
+	<resultMap type="employee" id="empMap">
+		<id property="empNo" column="emp_no"/>
+	    <result property="deptCode" column="dept_code"/>
+	    <result property="deptName" column="dept_name"/>
+	    <result property="empName" column="emp_name"/>
+	    <result property="empPw" column="emp_pw"/>
+	    <result property="empTel" column="emp_tel"/>
+	    <result property="extNo" column="ext_no"/>
+	    <result property="empEmail" column="emp_email"/>
+	    <result property="empPsnEmail" column="emp_psn_email"/>
+	    <result property="empBirth" column="emp_birth"/>
+	    <result property="empRrn" column="emp_rrn"/>
+	    <result property="empZip" column="emp_zip"/>
+	    <result property="empAddr1" column="emp_addr1"/>
+	    <result property="empAddr2" column="emp_addr2"/>
+	    <result property="signImg" column="sign_img"/>
+	    <result property="accountNo" column="account_no"/>
+	    <result property="joinDay" column="join_day"/>
+	    <result property="leaveDay" column="leave_day"/>
+	    <result property="yrycCount" column="yryc_count"/>
+	    <result property="positionCode" column="position_code"/>
+	    <result property="position" column="position"/>
+	    <result property="dutyCode" column="duty_code"/>
+	    <result property="duty" column="duty"/>
+	    <result property="bankCode" column="bank_code"/>
+	    <result property="bank" column="bank"/>
+	    <result property="hffcStatus" column="hffc_status"/>
+	    <result property="hffc" column="hffc"/>
+	    <result property="enabled" column="enabled"/>
+	    <result property="adminYn" column="admin_yn"/>
+	</resultMap>
+
+<sql id="baseQuery">
+  WHERE 3=3
+  <if test="boardCode != null">
+    AND board_code = #{boardCode}
+  </if>
+</sql>
+
+<!--
+ PaginationInfo(totalRecord=6, totalPage=1, currentPage=1, screenSize=10, blockSize=5
+ , startRow=1, endRow=10, startPage=1, endPage=5, dataList=null, searchType=null
+ , searchWord=null, boardCode=3, deptCode=0, empNo=2322000)
+-->
+<!-- 관리자는 모든 목록 확인 가능 -->
+<select id="suggestionlist" parameterType="PaginationInfo" resultMap="boardMap">
+       SELECT 	A.board_code
+		      , A.board_no
+		      , A.board_title
+		      , A.emp_no
+		      , A.board_content
+		      , A.reg_date
+		      , A.inq_cnt 
+		      , B.emp_name
+		FROM board A, employee B
+		WHERE A.EMP_NO = B.EMP_NO
+		AND board_code = #{boardCode}
+		order by BOARD_NO desc
+
+   </select>
+   
+<select id="list" parameterType="PaginationInfo" resultMap="boardMap">
+       SELECT 	A.board_code
+		      , A.board_no
+		      , A.board_title
+		      , A.emp_no
+		      , A.board_content
+		      , A.reg_date
+		      , A.inq_cnt 
+		      , B.emp_name
+		FROM board A, employee B
+		WHERE A.EMP_NO = B.EMP_NO
+		AND board_code = #{boardCode}
+		<if test="empNo!=null and empNo!=''">
+		AND   A.EMP_NO = #{empNo}
+		</if>
+		order by BOARD_NO desc
+   </select>
+
+	 <select id="listCount" resultType="int" parameterType="PaginationInfo">
+        SELECT COUNT(*) FROM board
+        where 1=1
+        and board_code = #{boardCode}
+        <include refid="noticeSearch"/>
+    </select>
+  	 
+  	    <sql id="noticeSearch">
+      <if test="searchType != null and searchType == 'title'">
+         and (board_title like '%'||#{searchWord}||'%')
+      </if>
+      <if test="searchType != null and searchType == 'writer'">
+         and (emp_no like '%'||#{searchWord}||'%')
+      </if>
+      <if test="searchType != null and searchType == 'content'">
+         and (board_content like '%'||#{searchWord}||'%')
+      </if>
+   </sql> 
+   
+       <select id="suggestiondetail" parameterType="int" resultType="board">
+      select
+         board_no,
+         board_title,
+         board_content,
+         b.emp_no as "EMP_NO",
+         reg_date,
+         inq_cnt,
+         e.emp_name as "employee.empName"
+      from board b
+      join employee e ON b.emp_no = e.emp_no
+      where board_no = #{boardNo}
+   </select>
+   
+   <select id="suggestiondetail2" parameterType="int" resultType="boardAttach">
+      select
+     	 file_no
+         ,file_name
+         ,file_savepath
+      from board_attach
+      where board_no = #{boardNo}
+   </select>
+   
+   <insert id="insert" parameterType="board" useGeneratedKeys="true">
+	    insert into board(
+	        board_no,
+	        emp_no,
+	        board_code,
+	        board_title,
+	        board_content,
+	        reg_date,
+	        update_date,
+	        inq_cnt,
+	        temp_yn
+	    ) values (
+	         #{boardNo}
+	        ,#{empNo}
+	        ,#{boardCode}
+	        ,#{boardTitle}
+	        ,#{boardContent}
+	        ,sysdate
+	        ,sysdate
+	        ,0
+	        ,'N'
+	    )
+	</insert>
+	
+	<select id="getBoardNo"  resultType="int">
+		select seq_board.nextval from dual
+	</select>
+	
+	<select id="getEmpNo" parameterType="int" resultType="string">
+	select emp_no
+	from board
+	where board_no = #{boardNo}
+	</select>
+	
+		
+
+    <delete id="suggestiondelete" parameterType="int">
+    	delete from board
+    	where board_no = #{boardNo}
+    </delete>
+    
+       <update id="update" parameterType="board">
+      update board
+      set
+         board_title = #{boardTitle},
+         board_content = #{boardContent}
+      where board_no = #{boardNo}
+   </update>
+  	 
+</mapper>

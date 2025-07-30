@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.dclz.mapper.DclzMapper">
+
+	<select id="selectEmpTime" resultType="dclz" parameterType="String">
+		select
+		d.dclz_no
+		, d.emp_no
+		, to_char(d.gowk_date, 'yyyy-MM-dd HH24:mi:ss') gowk_date
+		, to_char(d.lvwk_date, 'yyyy-MM-dd HH24:mi:ss') lvwk_date
+		from dclz d, employee e
+		where 1=1
+		and d.emp_no = e.emp_no
+		and e.emp_no = #{empNo}
+ 		and (TO_CHAR(d.gowk_date, 'YYMMDD') = TO_CHAR(SYSDATE, 'YYMMDD')
+    	or TO_CHAR(d.lvwk_date, 'YYMMDD') = TO_CHAR(SYSDATE, 'YYMMDD'))
+	</select>
+	
+	<select id="selectEmpCal" resultType="dclz" parameterType="String">
+		select
+		d.dclz_no
+		, d.emp_no
+		, to_char(d.gowk_date, 'yyyy-MM-dd HH24:mi:ss') gowk_date
+		, to_char(d.lvwk_date, 'yyyy-MM-dd HH24:mi:ss') lvwk_date
+		,CAL_TITLE
+		,CAL_CLASS_NAME
+		,HOURS_MINUTES
+		from dclz d, employee e
+		where 1=1
+		and d.emp_no = e.emp_no
+		and e.emp_no = #{empNo}	
+	</select>
+	
+	<update id="updateLeaveTime" parameterType="String">
+    update dclz
+    set
+        lvwk_date = sysdate,
+        CAL_TITLE = case when CAL_TITLE = '지각' then '지각' else '퇴근' end,
+        CAL_CLASS_NAME = case when CAL_TITLE = '지각' then 'bg-orange text-black' else 'bg-blue text-black' end,
+        CAL_COLOR = case when CAL_TITLE = '지각' then 'orange' else 'blue' end
+    where dclz_no = #{dclzNo}
+	</update>
+	
+	
+	<update id="updateLeaveTimeStat" parameterType="String">
+	  update dclz
+	  set
+	    HOURS_MINUTES = 
+	      CASE 
+	        WHEN TO_CHAR(sysdate, 'HH24:MI') >= '12:00' THEN
+	          TO_CHAR(TRUNC((lvwk_date - gowk_date) * 24) - 1, 'FM00')
+	          || '시간 '
+	          || TO_CHAR(ROUND(MOD((lvwk_date - gowk_date) * 24 * 60, 60)), 'FM00')
+	          || '분'
+	        ELSE
+	          TO_CHAR(TRUNC((lvwk_date - gowk_date) * 24), 'FM00')
+	          || '시간 '
+	          || TO_CHAR(ROUND(MOD((lvwk_date - gowk_date) * 24 * 60, 60)), 'FM00')
+	          || '분'
+	      END
+	  where dclz_no = #{dclzNo}
+	</update>
+	
+	
+	<insert id="insertStartTime" parameterType="dclz">
+		insert into dclz(
+			DCLZ_NO
+			,EMP_NO
+			,gowk_date
+			,CAL_TITLE
+			,CAL_CLASS_NAME	
+			,CAL_COLOR
+			,emp_name
+		) values (
+			TO_CHAR(SYSDATE, 'YYMMDD') || #{empNo}
+			,#{empNo}
+			,sysdate
+			<![CDATA[
+			,CASE WHEN TO_NUMBER(TO_CHAR(SYSDATE, 'HH24')) < 9 THEN '출근' ELSE '지각' END
+        	,CASE WHEN TO_NUMBER(TO_CHAR(SYSDATE, 'HH24')) < 9 THEN 'bg-green text-black' ELSE 'bg-orange text-black' END
+        	,CASE WHEN TO_NUMBER(TO_CHAR(SYSDATE, 'HH24')) < 9 THEN 'green' ELSE 'orange' END
+        	,(select emp_name from employee where emp_no = #{empNo})
+        	]]>
+		)
+	</insert>
+	
+	<select id="checkQRCode" parameterType="string" resultType="string">
+		<!-- employee에 있는 EMP_QR과 내가 인식한 QR이 일치해야함 -->
+		select emp_qr
+		from employee
+		where emp_no = #{empNo}
+	</select>
+	
+
+<!-- 	<select id="selectAllCalTitles" parameterType="string" resultType="string">
+		SELECT DISTINCT cal_title
+		FROM dclz
+	</select> -->
+	
+	
+	<select id="selectDclzCount" parameterType="map" resultType="int">
+		select
+			count(cal_title)
+		from dclz d, employee e
+		where 1=1
+		and d.emp_no = e.emp_no
+		and e.emp_no = #{empNo}
+		and cal_title = #{calTitle}
+        and SUBSTR(d.dclz_no, 1, 4) = TO_CHAR(SYSDATE, 'YYMM')
+	</select>
+	
+	
+	<select id="selectDclzDept" resultType="dclz" parameterType="string">
+	    SELECT 
+	        d.emp_name, e.dept_code, d.cal_title, d.gowk_date,hours_minutes,cal_color
+	    FROM 
+	        dclz d
+	    INNER JOIN 
+	        employee e ON d.emp_no = e.emp_no
+	    WHERE 
+	        e.dept_code = (SELECT dept_code FROM employee WHERE emp_no = #{empNo})
+	</select>
+	
+	
+	<insert id="insertDraftToDclz" parameterType="approval">
+	INSERT INTO dclz (
+	    DCLZ_NO,
+	    EMP_NO,
+	    GOWK_DATE,
+	    CAL_TITLE,
+	    CAL_CLASS_NAME,
+	    CAL_COLOR,
+	    EMP_NAME
+	) 
+	SELECT 
+	    TO_CHAR(TO_DATE(SUBSTR(d.drft_title, 7, 8), 'YYYYMMDD'), 'YYMMDD')  ||  d.emp_no,
+        d.emp_no AS EMP_NO,
+        TO_DATE(SUBSTR(d.drft_title, 7, 8), 'YYYYMMDD') AS GOWK_DATE,
+        CASE WHEN SUBSTR(d.drft_title, 1, 2) = '출장' THEN '출장' ELSE '연차' END AS CAL_TITLE,
+        CASE WHEN SUBSTR(d.drft_title, 1, 2) = '출장' THEN 'bg-yellow text-black' ELSE 'bg-purple text-black' END AS CAL_CLASS_NAME,
+        CASE WHEN SUBSTR(d.drft_title, 1, 2) = '출장' THEN 'yellow' ELSE 'purple' END AS CAL_COLOR,
+        e.emp_name AS EMP_NAME
+		FROM 
+		    drafting d
+		JOIN 
+		    approval a ON d.drft_no = a.drft_no
+		JOIN 
+		    employee e ON e.emp_no = d.emp_no
+		WHERE 
+		    d.drft_no = #{drftNo}
+	</insert>
+	
+	
+
+	
+	<!-- 휴가현황 -->
+	<select id="selectDrftToDclzRestCount" parameterType="dclzPage" resultType="int">
+	  	select 
+	  		count(DRFT_NO) 
+	  	from 
+	  		drafting
+	  	where
+	  		DRFT_FORM_NO = '4'
+	  	and 
+	  		emp_no = #{empNo}	
+ 	</select>
+ 	
+ 	<select id="selectDrftToDclzRestList" parameterType="dclzPage" resultType="drafting">
+	 	select
+			b.*
+		from(
+			select
+				a.*, row_number() over (order by a.DRFT_NO desc) rnum
+			from(
+			  	select
+			  		DRFT_NO, DRFT_TITLE
+			  	from 
+			  		drafting
+			  	where
+			  		DRFT_FORM_NO = '4' 
+			  	and
+			  		EMP_NO = #{empNo}
+			  	order by DRFT_NO desc
+		  		) a
+		  	) b	
+		  <![CDATA[
+		 where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+		  ]]>	 	
+ 	</select>
+ 	
+	
+	
+	
+
+	
+	<!-- 출장현황 -->
+	<select id="selectDrftToDclzTripCount" parameterType="dclzPage" resultType="int">
+	  	select 
+	  		count(DRFT_NO) 
+	  	from 
+	  		drafting
+	  	where
+	  		DRFT_FORM_NO = '5'
+	  	and 
+	  		emp_no = #{empNo}	
+ 	</select>
+ 	
+ 	<select id="selectDrftToDclzTripList" parameterType="dclzPage" resultType="drafting">
+ 		select
+			b.*
+		from(
+			select
+				a.*, row_number() over (order by a.DRFT_NO desc) rnum
+			from(
+			  	select
+			  		DRFT_NO, DRFT_TITLE
+			  	from 
+			  		drafting
+			  	where
+			  		DRFT_FORM_NO = '5' 
+			  	and
+			  		EMP_NO = #{empNo}
+			  	order by DRFT_NO desc
+		  		) a
+		  	) b	
+		 <![CDATA[
+		 where b.rnum >= #{startRow} and b.rnum <= #{endRow}
+		 ]]>	 
+ 	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

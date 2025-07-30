@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.board.mapper.ReplyMapper">
+
+<!-- Reply(replyNo=0, boardNo=512, empNo=2400000, replyContent=safdfsda, regDate=null, modDate=null, employee=null) -->
+	<insert id="replyInsert" parameterType="reply" useGeneratedKeys="true">
+		<selectKey keyProperty="replyNo" resultType="int" order="BEFORE">
+       		select seq_reply.nextval from dual
+		</selectKey>
+		insert into reply(
+			reply_no
+			, board_no
+			, emp_no
+			, reply_content
+			, reg_date
+			, mod_date
+		)values(
+			#{replyNo}
+			,#{boardNo}
+			,#{empNo}
+			,#{replyContent}
+			,sysdate
+			,sysdate
+		)
+	</insert>
+	
+	<select id="replyList" parameterType="int" resultType="reply">
+		SELECT
+		    r.reply_no,
+		    r.board_no,
+		    r.emp_no,
+		    r.reply_content,
+		    r.reg_date,
+		    r.mod_date,
+		    e.emp_name as "employee.empName"
+		FROM
+		    reply r
+		JOIN
+		    employee e ON r.emp_no = e.emp_no
+		WHERE
+		    r.board_no = #{boardNo}
+	</select>
+	
+    <delete id="replyDelete" parameterType="int">
+    	delete from reply
+    	where reply_no = #{replyNo}
+    </delete>
+    
+   <select id="replyDetail" parameterType="int" resultType="reply">
+      select
+			reply_no
+			, board_no
+			, emp_no
+			, reply_content
+			, reg_date
+			, mod_date
+      from reply
+      where board_no = #{boardNo}
+   </select>
+
+	<select id="getEmpNo" parameterType="int" resultType="string">
+		select emp_no
+		from reply
+		where reply_no = #{replyNo}
+</select>
+	
+<!--    <update id="replyUpdate" parameterType="reply">
+      update reply
+      set
+         reply_content = #{replyContent}
+      where board_no = #{boardNo}
+   </update> -->
+	
+<!-- 	<insert id="noticeReplyInsert" parameterType="reply" useGeneratedKeys="true">
+		<selectKey keyProperty="replyNo" resultType="int" order="BEFORE">
+       		select seq_reply.nextval from dual
+		</selectKey>
+		insert into reply(
+			reply_no
+			, board_no
+			, emp_no
+			, reply_content
+			, reg_date
+			, mod_date
+		)values(
+			#{replyNo}
+			,#{boardNo}
+			,#{empNo}
+			,#{replyContent}
+			,sysdate
+			,sysdate
+		)
+	</insert>
+	
+    <delete id="noticeReplyDelete" parameterType="int">
+    	delete from reply
+    	where reply_no = #{replyNo}
+    </delete>
+	
+   <update id="noticeReplyUpdate" parameterType="reply">
+      update reply
+      set
+         reply_content = #{replyContent}
+      where reply_no = #{replyNo}
+   </update> -->
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+</mapper>  

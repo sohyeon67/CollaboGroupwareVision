@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.mapper.ProjectMapper">
+
+	<!-- 프로젝트 생성 -->
+	<insert id="create" parameterType="project">
+		<selectKey keyProperty="projectId" order="BEFORE" resultType="string">
+			SELECT 'P' || TO_CHAR(SYSDATE, 'YYMM') || LPAD(seq_project.nextval, 3, '0') FROM DUAL
+		</selectKey>
+		INSERT INTO project(
+			project_id
+			, project_name
+			, project_description
+			, project_start_day
+			, project_end_day
+			, project_status
+		)
+		VALUES(
+			#{projectId}
+			, #{projectName}
+			, #{projectDescription}
+			, #{projectStartDay}
+			, #{projectEndDay}
+			, #{projectStatus}
+		)
+	</insert>
+	
+	<!-- 프로젝트 멤버 추가 -->
+	<insert id="addMember" parameterType="arrayList">
+		INSERT INTO project_member(
+			emp_no
+			, project_id
+			, leader_yn
+		)
+		<foreach collection="list" item="mem" separator="UNION ALL">
+			SELECT
+				#{mem.empNo}
+				, #{mem.projectId}
+				, #{mem.leaderYn}
+			FROM DUAL
+		</foreach>
+	</insert>
+	
+	<!-- 프로젝트 목록 -->
+	<select id="getProjectList" resultType="project">
+		SELECT
+		    p.project_id
+		    , p.project_name
+		    , p.project_start_day
+		    , p.project_end_day
+		    , get_common_code_name('1000', p.project_status) project_status
+		    , COUNT(pm.emp_no) mem_count
+		    , MAX(CASE WHEN pm.leader_yn = 'Y' THEN e.emp_name ELSE NULL END) leader_name
+		FROM
+		    project p
+		INNER JOIN
+		    project_member pm ON p.project_id = pm.project_id
+		LEFT JOIN
+		    employee e ON pm.emp_no = e.emp_no
+		GROUP BY
+		    p.project_id, p.project_name, p.project_start_day, p.project_end_day, p.project_status
+		ORDER BY
+			p.project_start_day DESC
+	</select>
+	
+	<!-- 프로젝트 상세정보 -->
+	<resultMap type="project" id="projectMap">
+	    <id property="projectId" column="project_id"/>
+	    <result property="projectName" column="project_name"/>
+	    <result property="projectDescription" column="project_description"/>
+	    <result property="projectStartDay" column="project_start_day"/>
+	    <result property="projectEndDay" column="project_end_day"/>
+	    <result property="projectStatus" column="project_status"/>
+	    
+	    <collection property="projectMemList" resultMap="memberMap"/>
+	</resultMap>
+	
+	<resultMap type="projectMember" id="memberMap">
+		<result property="empNo" column="emp_no"/>
+		<result property="projectId" column="project_id"/>
+		<result property="leaderYn" column="leader_yn"/>
+		<result property="empName" column="emp_name"/>
+		<result property="deptName" column="dept_name"/>
+		<result property="position" column="position"/>
+		<result property="profileImgPath" column="profile_img_path"/>
+	</resultMap>
+	
+	
+	<select id="getProjectDetails" parameterType="string" resultMap="projectMap">
+		SELECT
+		    p.project_id project_id
+		    , p.project_name project_name
+		    , p.project_description project_description
+		    , p.project_start_day project_start_day
+		    , p.project_end_day project_end_day
+		    , p.project_status project_status
+		    , pm.emp_no emp_no
+		    , pm.leader_yn leader_yn
+		    , e.emp_name emp_name
+		    , (SELECT dept_name FROM dept WHERE dept_code = e.dept_code) dept_name
+		    , get_common_code_name('100', e.position_code) position
+		    , e.profile_img_path profile_img_path
+		FROM
+		    project p
+		INNER JOIN
+		    project_member pm ON p.project_id = pm.project_id
+		INNER JOIN
+		    employee e ON pm.emp_no = e.emp_no
+		WHERE
+		    p.project_id = #{projectId}
+		ORDER BY
+	        CASE WHEN pm.leader_yn = 'Y' THEN 0 ELSE 1 END,
+	        e.position_code
+	</select>
+	
+	
+	<!-- 프로젝트 정보 업데이트 -->
+	<update id="update" parameterType="project">
+		UPDATE project
+		SET
+			project_name = #{projectName}
+			, project_description = #{projectDescription}
+			, project_start_day = #{projectStartDay}
+			, project_end_day = #{projectEndDay}
+			, project_status = #{projectStatus}
+		WHERE project_id = #{projectId}
+	</update>
+	
+	<!-- 모든 프로젝트 멤버 삭제 -->
+	<delete id="deleteAllMember" parameterType="string">
+		DELETE FROM project_member
+		WHERE project_id = #{projectId}
+	</delete>
+	
+	<!-- 자신이 참여한 프로젝트 총 개수, 상태별 수 가져오기 -->
+	<select id="getMyProjectCounts" parameterType="string" resultType="hashMap">
+		SELECT
+		    COUNT(DISTINCT p.project_id) total
+		    , COUNT(DISTINCT CASE WHEN p.project_status = '01' THEN p.project_id END) pending
+		    , COUNT(DISTINCT CASE WHEN p.project_status = '02' THEN p.project_id END) ongoing
+		    , COUNT(DISTINCT CASE WHEN p.project_status = '03' THEN p.project_id END) suspended
+		    , COUNT(DISTINCT CASE WHEN p.project_status = '04' THEN p.project_id END) completed
+		FROM
+		    project p
+		INNER JOIN
+		    project_member pm ON p.project_id = pm.project_id
+		WHERE
+		    pm.emp_no = #{empNo}
+	</select>
+	
+	<!-- 자신이 참여한 프로젝트 리스트 -->
+	<sql id="myProjectSearch">
+		<if test="searchType != null and searchType == 'projectId'">
+			AND (p.project_id LIKE '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'projectName'">
+			AND (project_name LIKE '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchVO.projectStatus != null">
+			AND (project_status LIKE '%'||#{searchVO.projectStatus}||'%')
+		</if>
+	</sql>
+	
+	<select id="getMyProjectList" parameterType="pagingVO" resultType="project">
+		SELECT
+			b.*
+		FROM (
+			SELECT
+				a.*, ROW_NUMBER() OVER (ORDER BY a.project_id DESC) rnum
+			FROM (
+				SELECT
+				    p.project_id
+				    , p.project_name
+				    , p.project_start_day
+				    , p.project_end_day
+				    , get_common_code_name('1000', p.project_status) project_status
+				    , (SELECT emp_name FROM employee WHERE emp_no = (SELECT emp_no FROM project_member WHERE project_id = p.project_id AND leader_yn = 'Y')) leader_name
+				    , (SELECT COUNT(*) FROM project_member WHERE project_id = p.project_id) mem_count
+				FROM
+				    project p
+				INNER JOIN
+				    project_member pm ON p.project_id = pm.project_id
+				WHERE
+				    pm.emp_no = #{empNo}
+				<include refid="myProjectSearch"/>
+			) a
+		)b
+		<![CDATA[
+		WHERE b.rnum >= #{startRow} AND b.rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<!-- 검색한 프로젝트 총 수 -->
+	<select id="getSearchMyProjectCount" parameterType="pagingVO" resultType="int">
+		SELECT
+		    COUNT(DISTINCT p.project_id) total
+		FROM
+		    project p
+		INNER JOIN
+		    project_member pm ON p.project_id = pm.project_id
+		WHERE
+		    pm.emp_no = #{empNo}
+		<include refid="myProjectSearch"/>
+	</select>
+	
+	<!-- 프로젝트 멤버인지 확인 -->
+	<select id="isProjectMember" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM project_member
+		WHERE project_id = #{projectId}
+		AND emp_no = #{empNo}
+	</select>
+	
+	
+	<!-- ************** 일감 관련 ************** -->
+	<insert id="issueRegister" parameterType="issue">
+		<selectKey keyProperty="issueNo" resultType="int" order="BEFORE">
+			SELECT seq_issue.nextval FROM dual
+		</selectKey>
+		INSERT INTO issue(
+			issue_no
+			, project_id
+			, issue_title
+			, issue_content
+			, issue_reg_date
+			, issue_start_day
+			, issue_end_day
+			, issue_writer
+			, issue_charger
+			, issue_progress
+			, issue_priority
+			, issue_type
+			, issue_status
+		)
+		VALUES(
+			#{issueNo}
+			, #{projectId}
+			, #{issueTitle}
+			, #{issueContent}
+			, SYSDATE
+			, #{issueStartDay}
+			, #{issueEndDay}
+			, #{issueWriter}
+			, #{issueCharger}
+			, #{issueProgress}
+			, #{issuePriority}
+			, #{issueType}
+			, #{issueStatus}
+		)
+	</insert>
+	
+	<!-- 일감 첨부파일 -->
+	<insert id="insertIssueFile" parameterType="issueAttach">
+		INSERT INTO issue_attach(
+			issue_file_no
+			, issue_no
+			, issue_file_name
+			, issue_file_size
+			, issue_file_fancysize
+			, issue_file_mime
+			, issue_file_savepath
+		)
+		VALUES(
+			seq_issue_attach.nextval
+			, #{issueNo}
+			, #{issueFileName}
+			, #{issueFileSize}
+			, #{issueFileFancysize}
+			, #{issueFileMime}
+			, #{issueFileSavepath}
+		)
+	</insert>
+	
+	<!-- 일감 리스트, 검색 ******************************************** -->
+	<sql id="issueSearch">
+		<if test="searchVO.issueType != null">
+			AND (issue_type LIKE '%'||#{searchVO.issueType}||'%')
+		</if>
+		<if test="searchVO.issueStatus != null">
+			AND (issue_status LIKE '%'||#{searchVO.issueStatus}||'%')
+		</if>
+		<if test="searchVO.issuePriority != null">
+			AND (issue_priority LIKE '%'||#{searchVO.issuePriority}||'%')
+		</if>
+		<if test="searchVO.issueCharger != null">
+			AND (issue_charger LIKE '%'||#{searchVO.issueCharger}||'%')
+		</if>
+		<if test="searchVO.issueTitle != null">
+			AND (issue_title LIKE '%'||#{searchVO.issueTitle}||'%')
+		</if>
+	</sql>
+	
+	<!-- 검색한 일감 수 -->
+	<select id="getSearchIssueCount" parameterType="pagingVO" resultType="int">
+		SELECT
+			COUNT(DISTINCT issue_no) total
+		FROM issue
+		WHERE
+			project_id = #{searchVO.projectId}
+		<include refid="issueSearch"/>
+	</select>
+	
+	<!-- 일감 리스트 -->
+	<select id="getIssueList" parameterType="pagingVO" resultType="issue">
+		SELECT
+		    c.*
+		FROM(
+		    SELECT
+		        b.*, ROW_NUMBER() OVER (ORDER BY issue_no DESC) rnum
+		    FROM(
+		        SELECT a.*
+		        FROM(
+		            SELECT
+		                issue_no
+		                , issue_type
+		                , issue_status
+		                , issue_priority
+		                , get_common_code_name('901', issue_type) type
+		                , get_common_code_name('902', issue_status) status
+		                , get_common_code_name('900', issue_priority) priority
+		                , issue_title
+		                , issue_charger
+		                , (SELECT emp_name FROM employee WHERE emp_no = issue_charger) issue_charger_name
+		                , (SELECT profile_img_path FROM employee WHERE emp_no = issue_charger) issue_charger_profile
+		                , issue_progress
+		                , issue_end_day
+		            FROM
+		                issue
+		            WHERE project_id = #{searchVO.projectId}
+		        ) a
+		        WHERE 1=1 
+		        <include refid="issueSearch"/>
+		    ) b
+		) c
+		<![CDATA[
+		WHERE c.rnum >= #{startRow} AND c.rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<!-- 일감 상세정보, 파일 리스트까지 가져오기 -->
+	<resultMap type="issue" id="issueMap">
+	    <id property="issueNo" column="issue_no"/>
+	    <result property="projectId" column="project_id"/>
+	    <result property="issueTitle" column="issue_title"/>
+	    <result property="issueContent" column="issue_content"/>
+	    <result property="issueRegDate" column="issue_reg_date"/>
+	    <result property="issueStartDay" column="issue_start_day"/>
+	    <result property="issueEndDay" column="issue_end_day"/>
+	    <result property="issueWriter" column="issue_writer"/>
+	    <result property="issueCharger" column="issue_charger"/>
+	    <result property="issueChargerName" column="issue_charger_name"/>
+	    <result property="issueChargerProfile" column="issue_charger_profile"/>
+	    <result property="issueProgress" column="issue_progress"/>
+	    <result property="issuePriority" column="issue_priority"/>
+	    <result property="priority" column="priority"/>
+	    <result property="issueType" column="issue_type"/>
+	    <result property="type" column="type"/>
+	    <result property="issueStatus" column="issue_status"/>
+	    <result property="status" column="status"/>
+	    
+	    <collection property="issueAttachList" resultMap="issueAttachMap"/>
+	</resultMap>
+	
+	<resultMap type="issueAttach" id="issueAttachMap">
+		<result property="issueNo" column="issue_no"/>
+		<result property="issueFileNo" column="issue_file_no"/>
+		<result property="issueFileName" column="issue_file_name"/>
+		<result property="issueFileSize" column="issue_file_size"/>
+		<result property="issueFileFancysize" column="issue_file_fancysize"/>
+		<result property="issueFileMime" column="issue_file_mime"/>
+		<result property="issueFileSavepath" column="issue_file_savepath"/>
+	</resultMap>
+	
+	<select id="getIssueDetails" resultMap="issueMap" parameterType="int">
+		SELECT
+		    i.project_id
+		    , i.issue_no
+		    , i.issue_type
+		    , i.issue_title
+		    , i.issue_content
+		    , i.issue_priority
+		    , i.issue_status
+		    , get_common_code_name('901', i.issue_type) type
+			, get_common_code_name('902', i.issue_status) status
+			, get_common_code_name('900', i.issue_priority) priority
+		    , TO_CHAR(i.issue_reg_date, 'YYYY-MM-DD HH24:MI:SS') issue_reg_date
+		    , i.issue_start_day
+		    , i.issue_end_day
+		    , (SELECT emp_name FROM employee WHERE emp_no = i.issue_writer) issue_writer
+		    , i.issue_charger
+		    , (SELECT emp_name FROM employee WHERE emp_no = i.issue_charger) issue_charger_name
+		    , (SELECT profile_img_path FROM employee WHERE emp_no = i.issue_charger) issue_charger_profile
+		    , i.issue_progress
+		    , ia.issue_file_no
+		    , ia.issue_file_name
+		    , ia.issue_file_size
+		    , ia.issue_file_fancysize
+		    , ia.issue_file_mime
+		    , ia.issue_file_savepath
+		FROM
+		    issue i
+		LEFT OUTER JOIN
+		    issue_attach ia ON ia.issue_no = i.issue_no
+		WHERE
+		    i.issue_no = #{issueNo}
+	</select>
+	
+	<!-- 일감 삭제 -->
+	<!-- 일감 첨부파일 먼저 삭제 -->
+	<delete id="deleteAllIssueAttach" parameterType="int">
+		DELETE FROM issue_attach
+		WHERE issue_no = #{issueNo}
+	</delete>
+	
+	<delete id="issueDelete" parameterType="int">
+		DELETE FROM issue
+		WHERE issue_no = #{issueNo}
+	</delete>
+	
+	<!-- 간트차트에 뿌려줄 데이터들 -->
+	<select id="getGanttChartData" parameterType="string" resultType="issue">
+		SELECT
+		    project_id
+		    , issue_no
+		    , issue_title
+		    , issue_content
+		    , issue_start_day
+		    , issue_end_day
+		    , issue_status
+		    , issue_priority
+		    , issue_type
+		    , issue_progress
+		    , (SELECT emp_name FROM employee WHERE emp_no = issue_charger) issue_charger_name
+		FROM issue
+		WHERE project_id = #{projectId}
+		ORDER BY issue_start_day, issue_no
+	</select>
+	
+	<!-- 일감 정보 수정 -->
+	<update id="issueUpdate" parameterType="issue">
+		UPDATE issue
+		SET
+			issue_title = #{issueTitle}
+			, issue_content = #{issueContent}
+			, issue_start_day = #{issueStartDay}
+			, issue_end_day = #{issueEndDay}
+			, issue_charger = #{issueCharger}
+			, issue_progress = #{issueProgress}
+			, issue_priority = #{issuePriority}
+			, issue_type = #{issueType}
+			, issue_status = #{issueStatus}
+		WHERE issue_no = #{issueNo}
+	</update>
+	
+	<!-- 담당자별 일감 통계 -->
+	<select id="getIssueMetrics" parameterType="string" resultType="hashMap">
+		SELECT 
+		    NVL((SELECT emp_name FROM employee WHERE emp_no = issue_charger), '전체') issue_charger_name
+		    , COUNT(issue_no) issue_count
+		    , ROUND(AVG(issue_progress), 1) avg_progress
+		FROM issue
+		WHERE project_id = #{projectId}
+		GROUP BY ROLLUP(issue_charger)
+		ORDER BY CASE WHEN issue_charger_name = '전체' THEN 1 ELSE 0 END
+	</select>
+	
+	<update id="updateIssueDate" parameterType="issue">
+		UPDATE issue
+		SET
+			issue_start_day = #{issueStartDay}
+			, issue_end_day = #{issueEndDay}
+		WHERE issue_no = #{issueNo}
+	</update>
+	
+</mapper>

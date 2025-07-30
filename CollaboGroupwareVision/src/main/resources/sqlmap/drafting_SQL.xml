@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.drafting.mapper.DraftingMapper">
+	
+	
+ 	<select id="selectMainToSign" parameterType="string" resultType="drafting">
+		select *
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by drft_no desc) as rnum
+		    from drafting a
+		    inner join 
+		        drafting_form b on a.drft_form_no = b.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status    
+		    where drft_status = 1 and drft_no in (
+		        select 
+		            drft_no
+		        from (
+		            select 
+		                drft_no,
+		                emp_no,
+		                row_number() over (partition by drft_no order by apprv_order) as rn
+		            from 
+		                approval
+		            where 
+		                apprv_status = '01'
+		        )
+		        where rn = 1 and emp_no = #{empNo}
+		    )
+		)
+		<![CDATA[
+		where rnum <= 5
+		]]>
+ 	</select>
+ 	
+ 	<select id="selectMainDrafting" parameterType="string" resultType="drafting">
+	 	select *
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by a.drft_no desc) as rnum
+		    from 
+		        drafting a
+		    inner join 
+		        drafting_form b on b.drft_form_no = a.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status
+		    where 
+		        a.emp_no = #{empNo}
+		)
+		<![CDATA[
+		where rnum >= 1 and rnum <= 5
+		]]>
+ 	</select>
+	
+	<select id="selectDraftingFormList" resultType="draftingForm"> 
+		select 
+			drft_form_no,
+			drft_form_name,
+			drft_form_content,
+			drft_form_create_date,
+			drft_form_delete_date,
+			drft_form_use_yn
+		from 
+			drafting_form
+			order by drft_form_no asc
+	</select>
+	
+	<select id="selectDraftingForm" parameterType="int" resultType="draftingForm">
+		select 
+			drft_form_no,
+			drft_form_name,
+			drft_form_content,
+			drft_form_create_date,
+			drft_form_delete_date,
+			drft_form_use_yn
+		from 
+			drafting_form
+		where 
+			drft_form_no = #{drftFormNo}
+	</select>
+	
+	
+ 	<select id="selectDraftingDayCount" resultType="string">
+ 		select
+		  to_char(sysdate, 'yyyymmdd') || '-' || 
+		  lpad(nvl(to_number(substr(max(drft_no), -4)), 0) + 1, 4, '0') as drafting_day_count
+		from
+		  drafting
+		where
+		  to_char(drft_date, 'yyyymmdd') = to_char(sysdate, 'yyyymmdd')  
+ 	</select>
+ 	
+ 	
+ 	<insert id="insertDrafting" parameterType="drafting">
+ 		insert into drafting(
+ 			drft_no,
+			emp_no,
+			drft_form_no,
+			drft_title,
+			drft_content,
+			drft_writer_name,
+			drft_writer_dept_name,
+			drft_writer_position_name,
+			drft_date,
+			drft_status,
+			drft_writer_sign_img
+ 		)values(
+ 			#{drftNo},
+ 			#{empNo},
+ 			#{drftFormNo},
+ 			#{drftTitle},
+ 			#{drftContent},
+ 			#{drftWriterName},
+ 			#{drftWriterDeptName},
+ 			#{drftWriterPositionName},
+ 			sysdate,
+ 			'01',
+ 			#{drftWriterSignImg}
+ 		)
+ 	</insert>
+ 	
+ 	<insert id="insertApproval" parameterType="approval">
+ 		insert into approval(
+			apprv_order,
+			drft_no,
+			emp_no,
+	 		apprv_signer_name,
+			apprv_signer_dept_name,
+			apprv_signer_position_name,
+			apprv_sign_img,
+			apprv_date,
+			apprv_status,
+			apprv_reject,
+			apprv_final_yn
+ 		) values(
+ 			#{apprvOrder},
+ 			#{drftNo},
+ 			#{empNo},
+ 			#{apprvSignerName},
+ 			#{apprvSignerDeptName},
+ 			#{apprvSignerPositionName},
+ 			null,
+ 			null,
+ 			'01',
+ 			null,
+ 			#{apprvFinalYn}
+ 		)
+ 	</insert>
+ 	
+ 	<insert id="insertDraftingAttach" parameterType="draftingAttach">
+ 		insert into drafting_attach(
+ 			drft_file_no,
+			drft_no,
+			drft_file_name,
+			drft_file_size,
+			drft_file_fancysize,
+			drft_file_mime,
+			drft_file_savepath,
+			drft_file_downcount
+ 		) values(
+ 			seq_drafting_attach.nextval, 
+ 			#{drftNo}, 
+ 			#{drftFileName}, 
+ 			#{drftFileSize}, 
+ 			#{drftFileFancysize},
+ 			#{drftFileMime},
+ 			#{drftFileSavepath},
+ 			0
+ 		)
+ 	</insert>
+ 	
+	<sql id="draftingSearch">
+		<if test="searchType != null and searchType == 'title'">
+			and (drft_title like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'writer'">
+			and (drft_writer_name like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'no'">
+			and (drft_no like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'form'">
+			and (drft_form_name like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'dept'">
+			and (drft_writer_dept_name like '%'||#{searchWord}||'%')
+		</if>
+		<if test="searchType != null and searchType == 'status'">
+			and (common_code_name like '%'||#{searchWord}||'%')
+		</if>
+	</sql>
+ 	
+	<select id="selectToSign" parameterType="pagingVO" resultType="drafting">
+		select *
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by drft_no desc) as rnum
+		    from drafting a
+		    inner join 
+		        drafting_form b on a.drft_form_no = b.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status    
+		    where drft_status = 1 and drft_no in (
+		        select 
+		            drft_no
+		        from (
+		            select 
+		                drft_no,
+		                emp_no,
+		                row_number() over (partition by drft_no order by apprv_order) as rn
+		            from 
+		                approval
+		            where 
+		                apprv_status = '01'
+		        )
+		        where 
+		        	rn = 1 
+	        		and 
+		        	emp_no = #{empNo}
+		        	<include refid="draftingSearch"/>
+		    )
+		)
+		<![CDATA[
+		where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+ 	</select>
+ 	
+ 	<select id="selectWriting" parameterType="pagingVO" resultType="drafting">
+	 	select *
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by a.drft_no desc) as rnum
+		    from 
+		        drafting a
+		    inner join 
+		        drafting_form b on b.drft_form_no = a.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status
+		    where 
+		        a.emp_no = #{empNo}
+		        <include refid="draftingSearch"/>
+		)
+		<![CDATA[
+		where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+ 	</select>
+
+ 	<select id="selectToApproval" parameterType="pagingVO" resultType="drafting">
+ 		select *
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by drft_no desc) as rnum
+		    from drafting a
+		    inner join 
+		        drafting_form b on a.drft_form_no = b.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status    
+		    where drft_no in (
+		        select 
+		    drft_no
+		from 
+		    approval
+		where 
+		    emp_no = #{empNo}
+		    <include refid="draftingSearch"/>
+		    )
+		)
+		<![CDATA[
+		where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+ 	</select>
+ 	
+ 	<select id="toSignCount" parameterType="pagingVO" resultType="int">
+	 	select count(*)
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by drft_no desc) as rnum
+		    from drafting a
+		    inner join 
+		        drafting_form b on a.drft_form_no = b.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status    
+		    where drft_status = 1 and drft_no in (
+		        select 
+		            drft_no
+		        from (
+		            select 
+		                drft_no,
+		                emp_no,
+		                row_number() over (partition by drft_no order by apprv_order) as rn
+		            from 
+		                approval
+		            where 
+		                apprv_status = '01'
+		        )
+		        where 
+		        	rn = 1 
+	        		and 
+		        	emp_no = #{empNo}
+		        	<include refid="draftingSearch"/>
+		    )
+		)
+ 	</select>
+ 	
+ 	<select id="writingCount" parameterType="pagingVO" resultType="int">
+ 		select count(*)
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by a.drft_no desc) as rnum
+		    from 
+		        drafting a
+		    inner join 
+		        drafting_form b on b.drft_form_no = a.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status
+		    where 
+		        a.emp_no = #{empNo}
+		        <include refid="draftingSearch"/>
+		)
+ 	</select>
+ 	
+ 	<select id="toApprvCount" parameterType="pagingVO" resultType="int">
+	 	select count(*)
+		from (
+		    select 
+		        a.drft_no,
+		        a.emp_no,
+		        b.drft_form_name,
+		        a.drft_title,
+		        a.drft_content,
+		        a.drft_writer_name,
+		        a.drft_writer_dept_name,
+		        a.drft_writer_position_name,
+		        a.drft_date,
+		        c.common_code_name as drft_status,
+		        row_number() over (order by drft_no desc) as rnum
+		    from drafting a
+		    inner join 
+		        drafting_form b on a.drft_form_no = b.drft_form_no
+		    inner join 
+		        common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status    
+		    where drft_no in (
+		        select 
+		    drft_no
+		from 
+		    approval
+		where 
+		    emp_no = #{empNo}
+		    <include refid="draftingSearch"/>
+		    )
+		)
+ 	</select>
+ 
+ 	<select id="detailDrafting" parameterType="string" resultType="drafting">
+ 		select 
+            a.drft_no,
+			a.emp_no,
+			a.drft_form_no,
+			b.drft_form_name,
+			a.drft_title,
+			a.drft_content,
+			a.drft_writer_name,
+			a.drft_writer_dept_name,
+			a.drft_writer_position_name,
+			a.drft_date,
+			c.common_code_name as drft_status,
+			a.drft_writer_sign_img
+		from 
+			drafting a
+		inner join 
+			drafting_form b on a.drft_form_no = b.drft_form_no
+		inner join 
+		    common_code c on c.common_code_group_id = 200 and c.common_code = a.drft_status
+		where 
+			drft_no = #{drftNo}
+ 	</select>
+ 	
+ 	<select id="detailApproval" parameterType="string" resultType="approval">
+ 		select 
+            a.apprv_signer_name,
+			a.apprv_order,
+			a.drft_no,
+			a.emp_no,
+			a.apprv_signer_dept_name,
+			a.apprv_signer_position_name,
+			a.apprv_sign_img,
+			a.apprv_date,
+			a.apprv_reject,
+			a.apprv_final_yn,
+			b.common_code_name as apprv_status
+		from 
+			approval a
+		inner join 
+			common_code b on b.common_code_group_id = 201 and b.common_code = a.apprv_status
+		where 
+			drft_no = #{drftNo} 
+			order by apprv_order asc
+ 	</select>
+ 	
+ 	<select id="detailDraftingAttach" parameterType="string" resultType="draftingAttach">
+ 		select 
+ 			drft_file_no,
+			drft_no,
+			drft_file_name,
+			drft_file_size,
+			drft_file_fancysize,
+			drft_file_mime,
+			drft_file_downcount,
+			drft_file_savepath
+ 		from 
+ 			drafting_attach
+		where 
+			drft_no = #{drftNo}
+			order by drft_file_no asc
+ 	</select>
+			
+	<update id="incrementDrftFileDowncount" parameterType="int">
+		update 
+			drafting_attach
+		set
+			drft_file_downcount = drft_file_downcount + 1
+		where
+			drft_file_no = #{drftFileNo}
+	</update>		
+
+	<select id="draftingAttachDownload" parameterType="int" resultType="draftingAttach">
+		select
+			drft_file_no,
+			drft_no,
+			drft_file_name,
+			drft_file_size,
+			drft_file_fancysize,
+			drft_file_mime,
+			drft_file_downcount,
+			drft_file_savepath
+		from 
+			drafting_attach
+		where
+			drft_file_no = #{drftFileNo}
+	</select>		
+	
+	<select id="signerNow" resultType="approval">
+		select 
+            drft_no,
+            emp_no,
+            apprv_final_yn
+        from(
+            select 
+		        drft_no,
+		        emp_no,
+		        apprv_final_yn,
+		        row_number() over (partition by drft_no order by apprv_order) as rn
+            from 
+                approval
+            where 
+                apprv_status = '01'
+                      )
+         where rn = 1
+	</select>
+		
+	<update id="acceptSign" parameterType="approval">
+		update 
+		    approval 
+		set 
+		    apprv_sign_img = #{apprvSignImg}, 
+		    apprv_date = sysdate, 
+		    apprv_status = '02'
+		where 
+		    drft_no = #{drftNo} and 
+		    emp_no = #{empNo}
+	</update>
+		
+	<update id="acceptDrafting" parameterType="string">
+		update 
+		    drafting 
+		set
+			drft_status = '02'
+		where     
+		    drft_no = #{drftNo}
+	</update>
+	
+	<update id="rejectSign" parameterType="approval">
+		update 
+		    approval 
+		set 
+		    apprv_date = sysdate, 
+		    apprv_status = '03',
+		    apprv_reject = #{apprvReject}
+		where 
+		    drft_no = #{drftNo} and 
+		    emp_no = #{empNo}
+	</update>
+	
+	<update id="rejectDrafting" parameterType="string">
+		update 
+		    drafting 
+		set
+			drft_status = '03'
+		where     
+		    drft_no = #{drftNo}
+	</update>
+	
+	<insert id="insertBookmark" parameterType="approvalBookmark" useGeneratedKeys="true">
+		<selectKey keyProperty="apprvBookmarkNo" resultType="int" order="BEFORE">
+			select seq_approval_bookmark.nextval from dual
+		</selectKey>
+		insert into approval_bookmark(
+		    apprv_bookmark_no,
+		    apprv_bookmark_emp_no,
+		    apprv_bookmark_name
+		    )
+		values(
+		    #{apprvBookmarkNo},
+		    #{apprvBookmarkEmpNo},
+		    #{apprvBookmarkName}
+		    )
+	</insert>
+	
+	<insert id="insertBookmarkList" parameterType="approvalBookmarkList">
+		insert into approval_bookmark_list(
+			apprv_bookmark_order,
+			apprv_bookmark_no,
+			emp_no
+			)
+		values(
+			#{apprvBookmarkOrder},
+			#{apprvBookmarkNo},
+			#{empNo}
+		)	
+	</insert>
+
+	<select id="selectBookmark" parameterType="string" resultType="approvalBookmark">
+		select
+		    apprv_bookmark_no,
+		    apprv_bookmark_emp_no,
+		    apprv_bookmark_name
+		from 
+		    approval_bookmark
+		where 
+		    apprv_bookmark_emp_no = #{apprvBookmarkEmpNo} 
+		    order by apprv_bookmark_no asc
+	</select>
+	
+	<select id="selectBookmarkList" parameterType="int" resultType="approvalBookmarkList">
+		select 
+		    apprv_bookmark_order,
+		    apprv_bookmark_no,
+		    emp_no
+		from 
+		    approval_bookmark_list
+		where 
+		    apprv_bookmark_no = #{apprvBookmarkNo}
+		    order by apprv_bookmark_order asc
+	</select>
+	
+	<delete id="deleteBookmarkList" parameterType="int">
+		delete from
+		    approval_bookmark
+		where
+		    apprv_bookmark_no = #{apprvBookmarkNo}
+	</delete>
+	
+	<delete id="deleteBookmark" parameterType="int">
+		delete from
+		    approval_bookmark_list
+		where 
+		    apprv_bookmark_no = #{apprvBookmarkNo}
+	</delete>
+	
+	
+	
+
+	
+</mapper>

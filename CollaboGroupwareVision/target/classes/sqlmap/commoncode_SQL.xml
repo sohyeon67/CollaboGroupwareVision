@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.commoncode.mapper.CommonCodeMapper">
+
+    <select id="selectAllCodes" resultType="commonCode">
+        SELECT 
+        	c.COMMON_CODE_GROUP_ID
+        	, g.COMMON_CODE_GROUP_NAME
+        	, c.COMMON_CODE
+        	, c.COMMON_CODE_NAME
+		FROM COMMON_CODE c
+		JOIN COMMON_CODE_GROUP g ON c.COMMON_CODE_GROUP_ID = g.COMMON_CODE_GROUP_ID
+		ORDER BY c.COMMON_CODE_GROUP_ID, c.COMMON_CODE
+    </select>
+	
+</mapper>
